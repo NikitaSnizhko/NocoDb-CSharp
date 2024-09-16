@@ -84,7 +84,7 @@ namespace NocoDb.Services
         {
             try
             {
-               var appInfoUrl = AppUrlConstants.AppInfoUrl; 
+                var appInfoUrl = AppUrlConstants.AppInfoUrl; 
                 var appInfoResponse = await _httpClient.GetAsync(appInfoUrl);
                 if (!appInfoResponse.IsSuccessStatusCode)
                 {

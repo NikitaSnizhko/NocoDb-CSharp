@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-namespace NocoDb.Models.Bases.Dto;
+namespace NocoDb.Models.Bases.RequestParameters;
 
-public class CreateBaseDto
+public class CreateBaseParameters
 {
-    public CreateBaseDto(
+    public CreateBaseParameters(
         [NotNull] string title)
     {
         Title = title ?? throw new ArgumentNullException(nameof(title)); 

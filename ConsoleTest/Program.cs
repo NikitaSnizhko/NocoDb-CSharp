@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
-using NocoDb.Models.Bases.Dto;
+using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils;
-using NocoDb.Models.GeneralNocoUtils.Dto;
+using NocoDb.Models.GeneralNocoUtils.RequestParameters;
 using NocoDb.Services;
 
 namespace ConsoleTest
@@ -19,7 +20,7 @@ namespace ConsoleTest
             var nocoClient = nocoClientBuilder.Build();
             
             /*// Test connection to the database  
-            var testDbConnectionDto = new TestDbConnectionDto(
+            var testDbConnectionDto = new TestDbConnectionParameters(
                 DbType.Mysql2,
                 "localhost",
                 "3306",
@@ -43,7 +44,7 @@ namespace ConsoleTest
             
             
             /*//Get base info by id
-            var databaseId = Environment.GetEnvironmentVariable("NocoInnerDbId", EnvironmentVariableTarget.User);
+            var databaseId = "some_Base_Id";
             var getBaseInfoResult = await nocoClient.GetBaseInfo(databaseId);
             if (!getBaseInfoResult.Success)
                 Console.WriteLine(getBaseInfoResult.ErrorMessage);
@@ -67,7 +68,7 @@ namespace ConsoleTest
 
             /*// Create a new base
             const string baseTitle = "TestBase";
-            var createBaseDto = new CreateBaseDto(baseTitle)
+            var createBaseParameters = new CreateBaseParameters(baseTitle)
             {
                 //These are optional
                 //Color = "#24716E",
@@ -76,7 +77,7 @@ namespace ConsoleTest
                 //Status = "active"
             };
             
-            var createBaseResult = await nocoClient.CreateBase(createBaseDto);
+            var createBaseResult = await nocoClient.CreateBase(createBaseParameters);
             if (!createBaseResult.Success)
                 Console.WriteLine(createBaseResult.ErrorMessage);
             else
@@ -130,7 +131,7 @@ namespace ConsoleTest
             
             /*//Update base by id
             var baseId = "some_Base_Id";
-            var updateBaseDto = new UpdateBaseDto(baseId)
+            var updateBaseParameters = new UpdateBaseParameters(baseId)
             {
                 //These are optional
                 Title = "Base for update_ " + DateTime.Now, 
@@ -139,7 +140,7 @@ namespace ConsoleTest
                 Status = "active",
                 Meta = null
             };
-            var updateBaseResult = await nocoClient.UpdateBase(updateBaseDto);
+            var updateBaseResult = await nocoClient.UpdateBase(updateBaseParameters);
             Console.WriteLine(updateBaseResult.Success
                 ? "Base updated"
                 : updateBaseResult.ErrorMessage);*/
@@ -147,12 +148,12 @@ namespace ConsoleTest
             
             /*//Duplicate base by id
             var baseId = "some_Base_Id";
-            var duplicateBaseDto = new DuplicateBaseDto(
+            var duplicateBaseParameters = new DuplicateBaseParameters(
                 baseId:baseId,
                 excludeData: true,
                 excludeHooks: true,
                 excludeViews: true);
-            var duplicateBaseResult = await nocoClient.DuplicateBase(duplicateBaseDto);
+            var duplicateBaseResult = await nocoClient.DuplicateBase(duplicateBaseParameters);
             if (!duplicateBaseResult.Success)
                 Console.WriteLine(duplicateBaseResult.ErrorMessage);
             else
@@ -160,6 +161,41 @@ namespace ConsoleTest
                 Console.WriteLine($"Base duplicated:\n" +
                                   $"Id: {duplicateBaseResult.Result.Id}\n" +
                                   $"BaseId: {duplicateBaseResult.Result.BaseId}\n");
+            }*/
+            
+            
+            /*//Get all tables in base
+            const string databaseId = "some_Base_Id";
+            var getAllTablesResult = await nocoClient.GetAllTablesInBase(databaseId);
+            if (!getAllTablesResult.Success)
+                Console.WriteLine(getAllTablesResult.ErrorMessage);
+            else
+            {
+                var tablesString = new StringBuilder();
+                tablesString.AppendLine($"Tables number:{getAllTablesResult.Result.Tables.Count}");
+                tablesString.AppendLine();
+                foreach (var table in getAllTablesResult.Result.Tables)
+                {
+                    tablesString.AppendLine($"Table info:\n" +
+                                            $"BaseId: {table.BaseId}\n" +
+                                            $"CreatedAt: {table.CreatedAt}\n" +
+                                            $"Description: {table.Description}\n" +
+                                            $"Enabled: {table.Enabled}\n" +
+                                            $"Id: {table.Id}\n" +
+                                            $"Mm: {table.Mm}\n" +
+                                            $"Meta: {table.Meta}\n" +
+                                            $"Order: {table.Order}\n" +
+                                            $"Pinned: {table.Pinned}\n" +
+                                            $"Schema: {table.Schema}\n" +
+                                            $"SourceId: {table.SourceId}\n" +
+                                            $"TableName: {table.TableName}\n" +
+                                            $"Tags: {table.Tags}\n" +
+                                            $"Title: {table.Title}\n" +
+                                            $"Type: {table.Type}\n" +
+                                            $"UpdatedAt: {table.UpdatedAt}\n");
+                    tablesString.AppendLine();
+                }
+                Console.WriteLine(tablesString);
             }*/
         }
     }

@@ -172,3 +172,40 @@ else
         $"BaseId: {duplicateBaseResult.Result.BaseId}\n");
 }
 ```
+
+### Tables methods:
+#### Get all tables in base:
+```csharp
+const string databaseId = "some_Base_Id";
+var getAllTablesResult = await nocoClient.GetAllTablesInBase(databaseId);
+if (!getAllTablesResult.Success)
+    Console.WriteLine(getAllTablesResult.ErrorMessage);
+else
+{
+    var tablesString = new StringBuilder();
+    tablesString.AppendLine($"Tables number:{getAllTablesResult.Result.Tables.Count}");
+    tablesString.AppendLine();
+    foreach (var table in getAllTablesResult.Result.Tables)
+    {
+        tablesString.AppendLine($"Table info:\n" +
+        $"BaseId: {table.BaseId}\n" +
+        $"CreatedAt: {table.CreatedAt}\n" +
+        $"Description: {table.Description}\n" +
+        $"Enabled: {table.Enabled}\n" +
+        $"Id: {table.Id}\n" +
+        $"Mm: {table.Mm}\n" +
+        $"Meta: {table.Meta}\n" +
+        $"Order: {table.Order}\n" +
+        $"Pinned: {table.Pinned}\n" +
+        $"Schema: {table.Schema}\n" +
+        $"SourceId: {table.SourceId}\n" +
+        $"TableName: {table.TableName}\n" +
+        $"Tags: {table.Tags}\n" +
+        $"Title: {table.Title}\n" +
+        $"Type: {table.Type}\n" +
+        $"UpdatedAt: {table.UpdatedAt}\n");
+        tablesString.AppendLine();
+        }
+    Console.WriteLine(tablesString);
+}
+```

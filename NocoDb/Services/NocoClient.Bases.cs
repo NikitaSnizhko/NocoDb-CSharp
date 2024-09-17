@@ -1,23 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using NocoDb.Utils;
-using System.Text.Json;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NocoDb.Extensions;
 using NocoDb.Models.Bases;
-using NocoDb.Models.Bases.Dto;
+using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.Bases.Response;
 using NocoDb.Models.Bases.Request;
 using NocoDb.Models.GeneralNocoUtils;
-using NocoDb.Models.GeneralNocoUtils.Dto;
-using NocoDb.Models.GeneralNocoUtils.Response;
-using NocoDb.Models.GeneralNocoUtils.Request;
-using NocoDb.Models.Records.Dto;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace NocoDb.Services
 {
@@ -35,7 +28,7 @@ namespace NocoDb.Services
             {
                 var baseInfoUrl = DbUrlConstants.GetDbInfoUrl(databaseId);
                 
-                var baseInfoResponse = await _httpClient.GetAsync(baseInfoUrl);
+                var baseInfoResponse = await httpClient.GetAsync(baseInfoUrl);
                 if (!baseInfoResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<GetBaseInfoResponse>()
@@ -73,7 +66,7 @@ namespace NocoDb.Services
             {
                 var allBasesUrl = DbUrlConstants.ListBasesUrl;
                 
-                var allBasesResponse = await _httpClient.GetAsync(allBasesUrl);
+                var allBasesResponse = await httpClient.GetAsync(allBasesUrl);
                 if (!allBasesResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<ListBasesResponse>()
@@ -105,21 +98,21 @@ namespace NocoDb.Services
         /// Create a new database with the "Title" as a mandatory property and other properties as optional.
         /// Official API ref: https://meta-apis-v2.nocodb.com/#tag/Base/operation/base-create
         /// </summary>
-        /// <param name="createBaseDto">List of properties to create a database.</param>
+        /// <param name="createBaseParameters">List of parameters to create a database.</param>
         /// <returns></returns>
         public async Task<OperationResult<CreateBaseResponse>> CreateBase(
-            [NotNull]CreateBaseDto createBaseDto)
+            [NotNull]CreateBaseParameters createBaseParameters)
         {
             try
             {
                 var createBaseRequest = new CreateBaseRequest()
                 {
-                    Title = createBaseDto.Title,
+                    Title = createBaseParameters.Title,
                     
-                    Color = !string.IsNullOrEmpty(createBaseDto.Color) ? createBaseDto.Color : string.Empty,
-                    Description = !string.IsNullOrEmpty(createBaseDto.Description) ? createBaseDto.Description : string.Empty,
-                    Order = createBaseDto.Order,
-                    Status = !string.IsNullOrEmpty(createBaseDto.Status) ? createBaseDto.Status : string.Empty,
+                    Color = !string.IsNullOrEmpty(createBaseParameters.Color) ? createBaseParameters.Color : string.Empty,
+                    Description = !string.IsNullOrEmpty(createBaseParameters.Description) ? createBaseParameters.Description : string.Empty,
+                    Order = createBaseParameters.Order,
+                    Status = !string.IsNullOrEmpty(createBaseParameters.Status) ? createBaseParameters.Status : string.Empty,
                     
                     //These properties are not implemented because it seems they do not affect the base creation.
                     //So they just hardcoded to default values.
@@ -156,7 +149,7 @@ namespace NocoDb.Services
                 var createBaseRequestJson = JsonConvert.SerializeObject(createBaseRequest);
                 const string createBaseUrl = DbUrlConstants.CreateBaseUrl;
                 var httpContent = new StringContent(createBaseRequestJson, Encoding.UTF8, MediaTypes.ApplicationJson);
-                var createBaseResponse = await _httpClient.PostAsync(createBaseUrl, httpContent);
+                var createBaseResponse = await httpClient.PostAsync(createBaseUrl, httpContent);
                 if (!createBaseResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<CreateBaseResponse>()
@@ -196,7 +189,7 @@ namespace NocoDb.Services
             {
                 var baseRequestUrl = DbUrlConstants.GetSingleDbUrl(databaseId);
                 
-                var baseResponse = await _httpClient.GetAsync(baseRequestUrl);
+                var baseResponse = await httpClient.GetAsync(baseRequestUrl);
                 if (!baseResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<GetBaseResponse>()
@@ -236,7 +229,7 @@ namespace NocoDb.Services
             {
                 var deleteBaseUrl = DbUrlConstants.DeleteSingleDbUrl(databaseId);
                 
-                var deleteBaseResponse = await _httpClient.DeleteAsync(deleteBaseUrl);
+                var deleteBaseResponse = await httpClient.DeleteAsync(deleteBaseUrl);
                 if (!deleteBaseResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<bool>()
@@ -268,19 +261,19 @@ namespace NocoDb.Services
         /// Update certain database with the provided properties.
         /// Official API ref: https://meta-apis-v2.nocodb.com/#tag/Base/operation/base-update
         /// </summary>
-        /// <param name="updateBaseDto">Properties to pass for update.</param>
+        /// <param name="updateBaseParameters">Parameters to pass for update.</param>
         /// <returns>Result bool value.</returns>
-        public async Task<OperationResult<bool>> UpdateBase([NotNull]UpdateBaseDto updateBaseDto)
+        public async Task<OperationResult<bool>> UpdateBase([NotNull]UpdateBaseParameters updateBaseParameters)
         {
             try
             {
                 var updateBaseRequest = new UpdateBaseRequest()
                 {
-                    Title = updateBaseDto.Title,
-                    Color = updateBaseDto.Color,
-                    Order = updateBaseDto.Order,
-                    Status = updateBaseDto.Status,
-                    Meta = updateBaseDto.Meta
+                    Title = updateBaseParameters.Title,
+                    Color = updateBaseParameters.Color,
+                    Order = updateBaseParameters.Order,
+                    Status = updateBaseParameters.Status,
+                    Meta = updateBaseParameters.Meta
                 };
                 //Here we are ensuring that the properties with null values are will not be serialized.
                 //This is very important otherwise the empty values will override the existing values.
@@ -289,9 +282,9 @@ namespace NocoDb.Services
                     NullValueHandling = NullValueHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.Ignore
                 });
-                var updateBaseUrl = DbUrlConstants.UpdateSingleDbUrl(updateBaseDto.Id);
+                var updateBaseUrl = DbUrlConstants.UpdateSingleDbUrl(updateBaseParameters.Id);
                 var httpContent = new StringContent(updateBaseRequestJson, Encoding.UTF8, MediaTypes.ApplicationJson);
-                var updateBaseResponse = await _httpClient.PatchAsync(updateBaseUrl, httpContent);
+                var updateBaseResponse = await httpClient.PatchAsync(updateBaseUrl, httpContent);
                 if (!updateBaseResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<bool>()
@@ -324,23 +317,23 @@ namespace NocoDb.Services
         /// Duplicate certain database by its id.
         /// Official API ref: https://meta-apis-v2.nocodb.com/#tag/Base/operation/base-duplicate
         /// </summary>
-        /// <param name="duplicateBaseDto">Properties to pass for duplicate.</param>
+        /// <param name="duplicateBaseParameters">Parameters to pass for duplicate.</param>
         /// <returns></returns>
         public async Task<OperationResult<DuplicateBaseResponse>> DuplicateBase(
-            [NotNull] DuplicateBaseDto duplicateBaseDto)
+            [NotNull] DuplicateBaseParameters duplicateBaseParameters)
         {
             try
             {
                 var duplicateBaseRequest = new DuplicateBaseRequest()
                 {
-                    ExcludeData = duplicateBaseDto.ExcludeData,
-                    ExcludeHooks = duplicateBaseDto.ExcludeHooks,
-                    ExcludeViews = duplicateBaseDto.ExcludeViews
+                    ExcludeData = duplicateBaseParameters.ExcludeData,
+                    ExcludeHooks = duplicateBaseParameters.ExcludeHooks,
+                    ExcludeViews = duplicateBaseParameters.ExcludeViews
                 };
                 var duplicateBaseRequestJson = JsonConvert.SerializeObject(duplicateBaseRequest);
-                var duplicateBaseUrl = DbUrlConstants.DuplicateSingleDbUrl(duplicateBaseDto.BaseId);
+                var duplicateBaseUrl = DbUrlConstants.DuplicateSingleDbUrl(duplicateBaseParameters.BaseId);
                 var httpContent = new StringContent(duplicateBaseRequestJson, Encoding.UTF8, MediaTypes.ApplicationJson);
-                var duplicateBaseResponse = await _httpClient.PostAsync(duplicateBaseUrl, httpContent);
+                var duplicateBaseResponse = await httpClient.PostAsync(duplicateBaseUrl, httpContent);
                 if (!duplicateBaseResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<DuplicateBaseResponse>()

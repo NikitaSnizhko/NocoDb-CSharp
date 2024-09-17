@@ -80,9 +80,9 @@
     <ItemGroup>
         <Compile Include="Extensions\HttpClientExtensions.cs" />
         <Compile Include="Models\Bases\BaseModel.cs" />
-        <Compile Include="Models\Bases\Dto\CreateBaseDto.cs" />
-        <Compile Include="Models\Bases\Dto\DuplicateBaseDto.cs" />
-        <Compile Include="Models\Bases\Dto\UpdateBaseDto.cs" />
+        <Compile Include="Models\Bases\RequestParameters\CreateBaseParameters.cs" />
+        <Compile Include="Models\Bases\RequestParameters\DuplicateBaseParameters.cs" />
+        <Compile Include="Models\Bases\RequestParameters\UpdateBaseParameters.cs" />
         <Compile Include="Models\Bases\Request\CreateBaseRequest.cs" />
         <Compile Include="Models\Bases\Request\DuplicateBaseRequest.cs" />
         <Compile Include="Models\Bases\Request\UpdateBaseRequest.cs" />
@@ -95,7 +95,7 @@
         <Compile Include="Models\Bases\VisualDbType.cs" />
         <Compile Include="Models\GeneralNocoUtils\ConnectionData.cs" />
         <Compile Include="Models\GeneralNocoUtils\DbType.cs" />
-        <Compile Include="Models\GeneralNocoUtils\Dto\TestDbConnectionDto.cs" />
+        <Compile Include="Models\GeneralNocoUtils\RequestParameters\TestDbConnectionParameters.cs" />
         <Compile Include="Models\GeneralNocoUtils\Request\TestDbConnectionRequest.cs" />
         <Compile Include="Models\GeneralNocoUtils\Response\GetAppInfoResponse.cs" />
         <Compile Include="Models\GeneralNocoUtils\Response\TestDbConnectionResponse.cs" />
@@ -103,9 +103,12 @@
         <Compile Include="Models\Records\Dto\CreateRecordDto.cs" />
         <Compile Include="Models\Records\Dto\GetRecordsQueryParamsDto.cs" />
         <Compile Include="Models\Records\Dto\UpdateRecordDto.cs" />
+        <Compile Include="Models\Tables\Response\GetAllTablesResponse.cs" />
+        <Compile Include="Models\Tables\TableModel.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Services\NocoClient.Bases.cs" />
         <Compile Include="Services\NocoClient.GeneralUtils.cs" />
+        <Compile Include="Services\NocoClient.Tables.cs" />
         <Compile Include="Services\NocoClientBuilder.cs" />
         <Compile Include="Services\NocoClient.cs" />
         <Compile Include="Services\NocoClientOptions.cs" />
@@ -116,9 +119,7 @@
         <Compile Include="Utils\OperationResult.cs" />
         <Compile Include="Utils\RecordUrlConstants.cs" />
         <Compile Include="Utils\StorageUrlConstants.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Models\Tables\" />
+        <Compile Include="Utils\TableUrlConstants.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />

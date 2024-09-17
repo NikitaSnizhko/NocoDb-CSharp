@@ -1,8 +1,8 @@
 using JetBrains.Annotations;
 
-namespace NocoDb.Models.GeneralNocoUtils.Dto
+namespace NocoDb.Models.GeneralNocoUtils.RequestParameters
 {
-    public class TestDbConnectionDto
+    public class TestDbConnectionParameters
     {
         public DbType Client { get; }
         public string Host { get; }
@@ -11,7 +11,7 @@ namespace NocoDb.Models.GeneralNocoUtils.Dto
         public string Password { get; }
         public string Database { get; }
         
-        public TestDbConnectionDto(
+        public TestDbConnectionParameters(
             DbType client, 
             [NotNull]string host, 
             [NotNull]string port, 

@@ -1,19 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using NocoDb.Utils;
-using System.Text.Json;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
-using NocoDb.Models.Bases.Response;
 using NocoDb.Models.GeneralNocoUtils;
-using NocoDb.Models.GeneralNocoUtils.Dto;
+using NocoDb.Models.GeneralNocoUtils.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils.Response;
 using NocoDb.Models.GeneralNocoUtils.Request;
-using NocoDb.Models.Records.Dto;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace NocoDb.Services
 {
@@ -23,36 +17,35 @@ namespace NocoDb.Services
         /// Test if the database connection is available.
         /// Official API ref: https://meta-apis-v2.nocodb.com/#tag/Utils/operation/utils-test-connection
         /// </summary>
-        /// <param name="testDbConnectionDto"></param>
+        /// <param name="testDbConnectionParameters"></param>
         /// <returns></returns>
-        public async Task<OperationResult<TestDbConnectionResponse>> TestDbConnection(TestDbConnectionDto testDbConnectionDto)
+        public async Task<OperationResult<TestDbConnectionResponse>> TestDbConnection(TestDbConnectionParameters testDbConnectionParameters)
         {
             try
             {
                 var testDbConnectionRequest = new TestDbConnectionRequest()
                 {
-                    Client = DbTypeHelper.GetDbTypeString(testDbConnectionDto.Client),
+                    Client = DbTypeHelper.GetDbTypeString(testDbConnectionParameters.Client),
                     Connection = new ConnectionData()
                     {
-                        Host = testDbConnectionDto.Host,
-                        Port = testDbConnectionDto.Port,
-                        Database = testDbConnectionDto.Database,
-                        User = testDbConnectionDto.User,
-                        Password = testDbConnectionDto.Password
+                        Host = testDbConnectionParameters.Host,
+                        Port = testDbConnectionParameters.Port,
+                        Database = testDbConnectionParameters.Database,
+                        User = testDbConnectionParameters.User,
+                        Password = testDbConnectionParameters.Password
                     }
                 };
                 var jsonTestDbConnection = JsonConvert.SerializeObject(testDbConnectionRequest);
                 var content = new StringContent(jsonTestDbConnection, Encoding.UTF8, MediaTypes.ApplicationJson);
                 var requestUrl = AppUrlConstants.ConnectionUrl;
                 
-                var connectionResponse = await _httpClient.PostAsync(requestUrl, content);
+                var connectionResponse = await httpClient.PostAsync(requestUrl, content);
                 
                 if (!connectionResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<TestDbConnectionResponse>()
                     {
                         Success = false,
-                        //Result = connectionResponse,
                         ErrorMessage = $"Failed to test DataBase connection. Status code: {connectionResponse.StatusCode}"
                     };
                 }
@@ -85,7 +78,7 @@ namespace NocoDb.Services
             try
             {
                 var appInfoUrl = AppUrlConstants.AppInfoUrl; 
-                var appInfoResponse = await _httpClient.GetAsync(appInfoUrl);
+                var appInfoResponse = await httpClient.GetAsync(appInfoUrl);
                 if (!appInfoResponse.IsSuccessStatusCode)
                 {
                     return new OperationResult<GetAppInfoResponse>()

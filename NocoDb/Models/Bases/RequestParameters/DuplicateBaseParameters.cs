@@ -2,9 +2,9 @@ using System;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-namespace NocoDb.Models.Bases.Dto;
+namespace NocoDb.Models.Bases.RequestParameters;
 
-public class DuplicateBaseDto(
+public class DuplicateBaseParameters(
     [NotNull]string baseId,
     bool excludeData = false,
     bool excludeViews = false,

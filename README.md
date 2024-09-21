@@ -224,7 +224,7 @@ else
 ```
     
     
-
+It is possible to create a table with any number of custom columns. 
 This is an example of creating a table with 4 custom columns:
 ```csharp
 const string databaseId = "some_Base_Id";
@@ -282,6 +282,34 @@ else
         $"Title: {createTableResult.Result.Title}\n" +
         $"Type: {createTableResult.Result.Type}\n" +
         $"UpdatedAt: {createTableResult.Result.UpdatedAt}\n");
+}
+```
+
+#### Get table by id:
+```csharp
+const string tableId = "some_Table_Id";
+var getTableResult = await nocoClient.GetTable(tableId);
+if (!getTableResult.Success)
+    Console.WriteLine(getTableResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Table info:\n" +
+        $"BaseId: {getTableResult.Result.BaseId}\n" +
+        $"CreatedAt: {getTableResult.Result.CreatedAt}\n" +
+        $"Description: {getTableResult.Result.Description}\n" +
+        $"Enabled: {getTableResult.Result.Enabled}\n" +
+        $"Id: {getTableResult.Result.Id}\n" +
+        $"Mm: {getTableResult.Result.Mm}\n" +
+        $"Meta: {getTableResult.Result.Meta}\n" +
+        $"Order: {getTableResult.Result.Order}\n" +
+        $"Pinned: {getTableResult.Result.Pinned}\n" +
+        $"Schema: {getTableResult.Result.Schema}\n" +
+        $"SourceId: {getTableResult.Result.SourceId}\n" +
+        $"TableName: {getTableResult.Result.TableName}\n" +
+        $"Tags: {getTableResult.Result.Tags}\n" +
+        $"Title: {getTableResult.Result.Title}\n" +
+        $"Type: {getTableResult.Result.Type}\n" +
+        $"UpdatedAt: {getTableResult.Result.UpdatedAt}\n");
 }
 ```
 

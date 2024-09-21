@@ -110,6 +110,7 @@
         <Compile Include="Models\Tables\Request\CreateTableRequest.cs" />
         <Compile Include="Models\Tables\Response\CreateTableResponse.cs" />
         <Compile Include="Models\Tables\Response\GetAllTablesResponse.cs" />
+        <Compile Include="Models\Tables\Response\GetTableResponse.cs" />
         <Compile Include="Models\Tables\TableModel.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Services\NocoClient.Bases.cs" />

@@ -266,8 +266,33 @@ namespace ConsoleTest
                                   $"UpdatedAt: {createTableResult.Result.UpdatedAt}\n");
             }*/
             #endregion
-            
-            
+
+            #region Get table by id.
+            const string tableId = "some_Table_Id";
+            var getTableResult = await nocoClient.GetTable(tableId);
+            if(!getTableResult.Success)
+                Console.WriteLine(getTableResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Table info:\n" +
+                                  $"BaseId: {getTableResult.Result.BaseId}\n" +
+                                  $"CreatedAt: {getTableResult.Result.CreatedAt}\n" +
+                                  $"Description: {getTableResult.Result.Description}\n" +
+                                  $"Enabled: {getTableResult.Result.Enabled}\n" +
+                                  $"Id: {getTableResult.Result.Id}\n" +
+                                  $"Mm: {getTableResult.Result.Mm}\n" +
+                                  $"Meta: {getTableResult.Result.Meta}\n" +
+                                  $"Order: {getTableResult.Result.Order}\n" +
+                                  $"Pinned: {getTableResult.Result.Pinned}\n" +
+                                  $"Schema: {getTableResult.Result.Schema}\n" +
+                                  $"SourceId: {getTableResult.Result.SourceId}\n" +
+                                  $"TableName: {getTableResult.Result.TableName}\n" +
+                                  $"Tags: {getTableResult.Result.Tags}\n" +
+                                  $"Title: {getTableResult.Result.Title}\n" +
+                                  $"Type: {getTableResult.Result.Type}\n" +
+                                  $"UpdatedAt: {getTableResult.Result.UpdatedAt}\n");
+            }
+            #endregion
             
         }
     }

@@ -30,4 +30,17 @@ public class TableUrlConstants
             throw new ArgumentNullException(nameof(baseId));
         return $"/api/v2/meta/bases/{baseId}/tables";
     }
+    
+    /// <summary>
+    /// Template url for getting a table by id.
+    /// </summary>
+    /// <param name="tableId"></param>
+    /// <returns>Return Url like: /api/v2/meta/tables/{tableId}</returns>
+    /// <exception cref="ArgumentNullException">Occurs when the value of tableId is Null or Empty.</exception>
+    public static string GetTableUrl([NotNull]string tableId)
+    {
+        if (string.IsNullOrEmpty(tableId))
+            throw new ArgumentNullException(nameof(tableId));
+        return $"/api/v2/meta/tables/{tableId}";
+    }
 }

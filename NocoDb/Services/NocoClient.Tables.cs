@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using NocoDb.Utils;
 using Newtonsoft.Json;
 using NocoDb.Models.Tables;
@@ -103,6 +104,47 @@ namespace NocoDb.Services
             catch (Exception e)
             {
                 return new OperationResult<CreateTableResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = e.Message
+                };
+            }
+        }
+        
+        
+        /// <summary>
+        /// Get a table by its ID.
+        /// Official API reference: <a href="https://meta-apis-v2.nocodb.com/#tag/DB-Table/operation/db-table-read">Get Table</a>
+        /// </summary>
+        /// <param name="tableId"></param>
+        /// <returns></returns>
+        public async Task<OperationResult<GetTableResponse>> GetTable([NotNull]string tableId)
+        {
+            try
+            {
+                var url = TableUrlConstants.GetTableUrl(tableId);
+                var response = await httpClient.GetAsync(url);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new OperationResult<GetTableResponse>()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Error getting table. Status code: {response.StatusCode}"
+                    };
+                }
+
+                var table = JsonConvert.DeserializeObject<GetTableResponse>(responseContent);
+                return new OperationResult<GetTableResponse>()
+                {
+                    Success = true,
+                    Result = table
+                };
+
+            }
+            catch (Exception e)
+            {
+                return new OperationResult<GetTableResponse>()
                 {
                     Success = false,
                     ErrorMessage = e.Message

@@ -268,7 +268,7 @@ namespace ConsoleTest
             #endregion
 
             #region Get table by id.
-            const string tableId = "some_Table_Id";
+            /*const string tableId = "some_Table_Id";
             var getTableResult = await nocoClient.GetTable(tableId);
             if(!getTableResult.Success)
                 Console.WriteLine(getTableResult.ErrorMessage);
@@ -291,9 +291,19 @@ namespace ConsoleTest
                                   $"Title: {getTableResult.Result.Title}\n" +
                                   $"Type: {getTableResult.Result.Type}\n" +
                                   $"UpdatedAt: {getTableResult.Result.UpdatedAt}\n");
-            }
+            }*/
             #endregion
             
+            #region Update table by id
+            /*const string tableId = "some_Table_Id";
+            var updateTableParameters = new UpdateTableParameters(tableId)
+            {
+                TableName = "New Users",
+                Title = "New Users"
+            };
+            var updateTableResult = await nocoClient.UpdateTable(updateTableParameters);
+            Console.WriteLine(updateTableResult.Success ? "Table updated." : updateTableResult.ErrorMessage);*/
+            #endregion
         }
     }
 }

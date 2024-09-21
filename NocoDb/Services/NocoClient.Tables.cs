@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using NocoDb.Utils;
 using Newtonsoft.Json;
+using NocoDb.Extensions;
 using NocoDb.Models.Tables;
 using NocoDb.Models.Tables.Request;
 using NocoDb.Models.Tables.RequestParameters;
@@ -145,6 +146,55 @@ namespace NocoDb.Services
             catch (Exception e)
             {
                 return new OperationResult<GetTableResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = e.Message
+                };
+            }
+        }
+        
+        
+        /// <summary>
+        /// Update a table.
+        /// Official API reference: <a href="https://meta-apis-v2.nocodb.com/#tag/DB-Table/operation/db-table-update">Update Table</a>
+        /// </summary>
+        /// <param name="updateTableParameters"></param>
+        /// <returns></returns>
+        public async Task<OperationResult<bool>> UpdateTable([NotNull]UpdateTableParameters updateTableParameters)
+        {
+            try
+            {
+                var updateTableRequest = new UpdateTableRequest()
+                {
+                    TableName = updateTableParameters.TableName,
+                    Title = updateTableParameters.Title,
+                    BaseId = updateTableParameters.BaseId,
+                    Meta = updateTableParameters.Meta
+                };
+                var updateTableRequestJson = JsonConvert.SerializeObject(updateTableRequest);
+                var httpContent = new StringContent(updateTableRequestJson, System.Text.Encoding.UTF8, MediaTypes.ApplicationJson);
+                var url = TableUrlConstants.UpdateTableUrl(updateTableParameters.TableId);
+                var updateTableResponse = await httpClient.PatchAsync(url, httpContent);
+                
+                if (!updateTableResponse.IsSuccessStatusCode)
+                {
+                    return new OperationResult<bool>()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Error updating table. Status code: {updateTableResponse.StatusCode}"
+                    };
+                }
+
+                return new OperationResult<bool>()
+                {
+                    Success = true,
+                    Result = true
+                };
+
+            }
+            catch (Exception e)
+            {
+                return new OperationResult<bool>()
                 {
                     Success = false,
                     ErrorMessage = e.Message

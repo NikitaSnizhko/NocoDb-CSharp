@@ -313,3 +313,14 @@ else
 }
 ```
 
+#### Update table:
+```csharp
+const string tableId = "some_Table_Id";
+var updateTableParameters = new UpdateTableParameters(tableId)
+{
+    TableName = "New Users",
+    Title = "New Users"
+};
+var updateTableResult = await nocoClient.UpdateTable(updateTableParameters);
+Console.WriteLine(updateTableResult.Success ? "Table updated." : updateTableResult.ErrorMessage);
+```

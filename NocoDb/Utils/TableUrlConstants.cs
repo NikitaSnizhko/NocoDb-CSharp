@@ -70,4 +70,20 @@ public class TableUrlConstants
             throw new ArgumentNullException(nameof(tableId));
         return $"/api/v2/meta/tables/{tableId}";
     }
+    
+    /// <summary>
+    /// Template url for duplicating a table by id.
+    /// </summary>
+    /// <param name="baseId"></param>
+    /// <param name="tableId"></param>
+    /// <returns>Return Url like: /api/v2/meta/duplicate/{baseId}/table/{tableId}</returns>
+    /// <exception cref="ArgumentNullException">Occurs when the value of tableId or baseId is Null or Empty.</exception>
+    public static string DuplicateTableUrl([NotNull]string baseId, [NotNull]string tableId )
+    {
+        if (string.IsNullOrEmpty(tableId))
+            throw new ArgumentNullException(nameof(tableId));
+        if (string.IsNullOrEmpty(baseId))
+            throw new ArgumentNullException(nameof(baseId));
+        return $"/api/v2/meta/duplicate/{baseId}/table/{tableId}";
+    }
 }

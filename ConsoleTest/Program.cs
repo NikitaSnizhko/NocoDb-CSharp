@@ -165,8 +165,8 @@ namespace ConsoleTest
                                   $"Id: {duplicateBaseResult.Result.Id}\n" +
                                   $"BaseId: {duplicateBaseResult.Result.BaseId}\n");
             }*/
-            
-            
+
+            #region Get all tables in base
             /*//Get all tables in base
             const string databaseId = "some_Base_Id";
             var getAllTablesResult = await nocoClient.GetAllTablesInBase(databaseId);
@@ -200,6 +200,7 @@ namespace ConsoleTest
                 }
                 Console.WriteLine(tablesString);
             }*/
+            #endregion
 
             #region Create a new table
             //1) Simple empty table:
@@ -306,9 +307,28 @@ namespace ConsoleTest
             #endregion
             
             #region Delete table by id
-            const string tableId = "ms6a9du7yhb6w3r";
+            /*const string tableId = "some_Table_Id";
             var deleteTableResult = await nocoClient.DeleteTable(tableId);
-            Console.WriteLine(deleteTableResult.Success ? "Table deleted." : deleteTableResult.ErrorMessage);
+            Console.WriteLine(deleteTableResult.Success ? "Table deleted." : deleteTableResult.ErrorMessage);*/
+            #endregion
+            
+            #region Duplicate table by id
+            /*const string tableId = "some_Table_Id";
+            const string baseId = "some_Base_Id";
+            var duplicateTableParameters = new DuplicateTableParameters(baseId, tableId)
+            {
+                //These are optional
+                ExcludeData = true,
+                ExcludeViews = true
+            };
+            var duplicateTableResult = await nocoClient.DuplicateTable(duplicateTableParameters);
+            if (!duplicateTableResult.Success)
+                Console.WriteLine(duplicateTableResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Table duplicated:\n" +
+                                  $"Id: {duplicateTableResult.Result.Id}");
+            }*/
             #endregion
         }
     }

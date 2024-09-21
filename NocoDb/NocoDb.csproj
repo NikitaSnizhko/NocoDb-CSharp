@@ -107,10 +107,13 @@
         <Compile Include="Models\Tables\NormalColumnModel.cs" />
         <Compile Include="Models\Tables\RequestParameters\CreateColumnParameters.cs" />
         <Compile Include="Models\Tables\RequestParameters\CreateTableParameters.cs" />
+        <Compile Include="Models\Tables\RequestParameters\DuplicateTableParameters.cs" />
         <Compile Include="Models\Tables\RequestParameters\UpdateTableParameters.cs" />
         <Compile Include="Models\Tables\Request\CreateTableRequest.cs" />
+        <Compile Include="Models\Tables\Request\DuplicateTableRequest.cs" />
         <Compile Include="Models\Tables\Request\UpdateTableRequest.cs" />
         <Compile Include="Models\Tables\Response\CreateTableResponse.cs" />
+        <Compile Include="Models\Tables\Response\DuplicateTableResponse.cs" />
         <Compile Include="Models\Tables\Response\GetAllTablesResponse.cs" />
         <Compile Include="Models\Tables\Response\GetTableResponse.cs" />
         <Compile Include="Models\Tables\TableModel.cs" />

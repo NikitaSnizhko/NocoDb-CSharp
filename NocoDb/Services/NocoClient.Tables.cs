@@ -240,5 +240,54 @@ namespace NocoDb.Services
                 };
             }
         }
+
+
+        /// <summary>
+        /// Duplicate a table.
+        /// Official API reference: <a href="https://meta-apis-v2.nocodb.com/#tag/DB-Table/operation/db-table-duplicate">Duplicate Table</a>
+        /// </summary>
+        /// <param name="duplicateTableParameters"></param>
+        /// <returns></returns>
+        public async Task<OperationResult<DuplicateTableResponse>> DuplicateTable(
+            [NotNull] DuplicateTableParameters duplicateTableParameters)
+        {
+            try
+            {
+                var duplicateTableRequest = new DuplicateTableRequest()
+                {
+                    ExcludeData = duplicateTableParameters.ExcludeData,
+                    ExcludeViews = duplicateTableParameters.ExcludeViews
+                };
+                var duplicateTableRequestJson = JsonConvert.SerializeObject(duplicateTableRequest);
+                var httpContent = new StringContent(duplicateTableRequestJson, System.Text.Encoding.UTF8, MediaTypes.ApplicationJson);
+                var url = TableUrlConstants.DuplicateTableUrl(duplicateTableParameters.BaseId, duplicateTableParameters.TableId);
+                var duplicateTableResponse = await httpClient.PostAsync(url, httpContent);
+                
+                if (!duplicateTableResponse.IsSuccessStatusCode)
+                {
+                    return new OperationResult<DuplicateTableResponse>()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Error duplicating table. Status code: {duplicateTableResponse.StatusCode}"
+                    };
+                }
+
+                var duplicateTableResponseString = await duplicateTableResponse.Content.ReadAsStringAsync();
+                var duplicateTableObject = JsonConvert.DeserializeObject<DuplicateTableResponse>(duplicateTableResponseString);
+                return new OperationResult<DuplicateTableResponse>()
+                {
+                    Success = true,
+                    Result = duplicateTableObject
+                };
+            }
+            catch (Exception e)
+            {
+                return new OperationResult<DuplicateTableResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = e.Message
+                };
+            }
+        }
     }
 }

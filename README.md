@@ -332,3 +332,23 @@ const string tableId = "some_Table_Id";
 var deleteTableResult = await nocoClient.DeleteTable(tableId);
 Console.WriteLine(deleteTableResult.Success ? "Table deleted." : deleteTableResult.ErrorMessage);
 ```
+
+#### Duplicate table:
+```csharp
+const string tableId = "some_Table_Id";
+const string baseId = "some_Base_Id";
+var duplicateTableParameters = new DuplicateTableParameters(baseId, tableId)
+{
+    //These are optional
+    ExcludeData = true,
+    ExcludeViews = true
+};
+var duplicateTableResult = await nocoClient.DuplicateTable(duplicateTableParameters);
+if (!duplicateTableResult.Success)
+    Console.WriteLine(duplicateTableResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Table duplicated:\n" +
+        $"Id: {duplicateTableResult.Result.Id}");
+}
+```

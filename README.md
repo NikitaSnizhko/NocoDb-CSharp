@@ -1,7 +1,10 @@
 # NocoDb-CSharp
+
 This is a C# client for NocoDB API. It is a simple and easy-to-use library that allows you to interact with NocoDB API.
 You can find official documentation for NocoDB API [here](https://meta-apis-v2.nocodb.com).
+
 ---
+
 NOTE: This library based on **.NET Framework 4.8** and other versions of .NET will be added soon.
 
 ---

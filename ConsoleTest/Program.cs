@@ -304,6 +304,12 @@ namespace ConsoleTest
             var updateTableResult = await nocoClient.UpdateTable(updateTableParameters);
             Console.WriteLine(updateTableResult.Success ? "Table updated." : updateTableResult.ErrorMessage);*/
             #endregion
+            
+            #region Delete table by id
+            const string tableId = "ms6a9du7yhb6w3r";
+            var deleteTableResult = await nocoClient.DeleteTable(tableId);
+            Console.WriteLine(deleteTableResult.Success ? "Table deleted." : deleteTableResult.ErrorMessage);
+            #endregion
         }
     }
 }

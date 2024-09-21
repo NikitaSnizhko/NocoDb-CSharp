@@ -159,7 +159,7 @@ namespace NocoDb.Services
         /// Official API reference: <a href="https://meta-apis-v2.nocodb.com/#tag/DB-Table/operation/db-table-update">Update Table</a>
         /// </summary>
         /// <param name="updateTableParameters"></param>
-        /// <returns></returns>
+        /// <returns>True if the table was updated successfully, otherwise false.</returns>
         public async Task<OperationResult<bool>> UpdateTable([NotNull]UpdateTableParameters updateTableParameters)
         {
             try
@@ -182,6 +182,45 @@ namespace NocoDb.Services
                     {
                         Success = false,
                         ErrorMessage = $"Error updating table. Status code: {updateTableResponse.StatusCode}"
+                    };
+                }
+
+                return new OperationResult<bool>()
+                {
+                    Success = true,
+                    Result = true
+                };
+
+            }
+            catch (Exception e)
+            {
+                return new OperationResult<bool>()
+                {
+                    Success = false,
+                    ErrorMessage = e.Message
+                };
+            }
+        }
+
+        
+        /// <summary>
+        /// Delete a table.
+        /// Official API reference: <a href="https://meta-apis-v2.nocodb.com/#tag/DB-Table/operation/db-table-delete">Delete Table</a>
+        /// </summary>
+        /// <param name="tableId"></param>
+        /// <returns>True if the table was deleted successfully, otherwise false.</returns>
+        public async Task<OperationResult<bool>> DeleteTable([NotNull] string tableId)
+        {
+            try
+            {
+                var url = TableUrlConstants.DeleteTableUrl(tableId);
+                var response = await httpClient.DeleteAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new OperationResult<bool>()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Error deleting table. Status code: {response.StatusCode}"
                     };
                 }
 

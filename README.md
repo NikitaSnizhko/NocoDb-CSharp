@@ -324,3 +324,11 @@ var updateTableParameters = new UpdateTableParameters(tableId)
 var updateTableResult = await nocoClient.UpdateTable(updateTableParameters);
 Console.WriteLine(updateTableResult.Success ? "Table updated." : updateTableResult.ErrorMessage);
 ```
+
+
+#### Delete table:
+```csharp   
+const string tableId = "some_Table_Id";
+var deleteTableResult = await nocoClient.DeleteTable(tableId);
+Console.WriteLine(deleteTableResult.Success ? "Table deleted." : deleteTableResult.ErrorMessage);
+```

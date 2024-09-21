@@ -103,6 +103,12 @@
         <Compile Include="Models\Records\Dto\CreateRecordDto.cs" />
         <Compile Include="Models\Records\Dto\GetRecordsQueryParamsDto.cs" />
         <Compile Include="Models\Records\Dto\UpdateRecordDto.cs" />
+        <Compile Include="Models\Tables\ColumnDataType.cs" />
+        <Compile Include="Models\Tables\NormalColumnModel.cs" />
+        <Compile Include="Models\Tables\RequestParameters\CreateColumnParameters.cs" />
+        <Compile Include="Models\Tables\RequestParameters\CreateTableParameters.cs" />
+        <Compile Include="Models\Tables\Request\CreateTableRequest.cs" />
+        <Compile Include="Models\Tables\Response\CreateTableResponse.cs" />
         <Compile Include="Models\Tables\Response\GetAllTablesResponse.cs" />
         <Compile Include="Models\Tables\TableModel.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>

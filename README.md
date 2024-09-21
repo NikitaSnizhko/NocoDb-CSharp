@@ -22,14 +22,14 @@ Here are list of what is currently implemented:
 
 #### Test connection to the database:
 ```csharp
-var testDbConnectionDto = new TestDbConnectionDto(
+var testDbConnectionParameters = new TestDbConnectionParameters(
 DbType.Mysql2,
 "localhost",
 "3306",
 "root",
 "password",
 null);
-var testDbConnectionResult = await nocoClient.TestDbConnection(testDbConnectionDto);
+var testDbConnectionResult = await nocoClient.TestDbConnection(testDbConnectionParameters);
 Console.WriteLine(!testDbConnectionResult.Success
 ? testDbConnectionResult.ErrorMessage
 : $"Connection successful:\n{testDbConnectionResult.Result.Data}");
@@ -73,7 +73,7 @@ Console.WriteLine(!getAllBasesResult.Success
 #### Create a new base:
 ```csharp
 const string baseTitle = "TestBase";            
-var createBaseDto = new CreateBaseDto(baseTitle)
+var createBaseParameters = new CreateBaseParameters(baseTitle)
 {
     //These are optional
     //Color = "#24716E",
@@ -81,7 +81,7 @@ var createBaseDto = new CreateBaseDto(baseTitle)
     //Order = 10,
     //Status = "active"
 };
-var createBaseResult = await nocoClient.CreateBase(createBaseDto);
+var createBaseResult = await nocoClient.CreateBase(createBaseParameters);
 if (!createBaseResult.Success)
     Console.WriteLine(createBaseResult.ErrorMessage);
 else
@@ -138,7 +138,7 @@ Console.WriteLine(deleteBaseResult.Success
 #### Update base by id:
 ```csharp
 var baseId = "some_Base_Id";
-var updateBaseDto = new UpdateBaseDto(baseId)
+var updateBaseParameters = new UpdateBaseParameters(baseId)
 {
     //These are optional. You can update only the fields you want.
     Title = "Base for update_ " + DateTime.Now,
@@ -147,7 +147,7 @@ var updateBaseDto = new UpdateBaseDto(baseId)
     Status = "active",
     Meta = null
 };
-var updateBaseResult = await nocoClient.UpdateBase(updateBaseDto);
+var updateBaseResult = await nocoClient.UpdateBase(updateBaseParameters);
 Console.WriteLine(updateBaseResult.Success
     ? "Base updated"
     : updateBaseResult.ErrorMessage);
@@ -157,12 +157,12 @@ Console.WriteLine(updateBaseResult.Success
 #### Duplicate base by id:
 ```csharp
 var baseId = "some_Base_Id";
-var duplicateBaseDto = new DuplicateBaseDto(    
+var duplicateBaseParameters = new DuplicateBaseParameters(    
     baseId: baseId,
     excludeData: true,
     excludeHooks: true,
     excludeViews: true);
-var duplicateBaseResult = await nocoClient.DuplicateBase(duplicateBaseDto);
+var duplicateBaseResult = await nocoClient.DuplicateBase(duplicateBaseParameters);
 if (!duplicateBaseResult.Success)
     Console.WriteLine(duplicateBaseResult.ErrorMessage);
 else
@@ -209,3 +209,79 @@ else
     Console.WriteLine(tablesString);
 }
 ```
+
+#### Create a new table in base:
+This is an example of creating a simple empty table:
+```csharp
+const string databaseId = "some_Base_Id";
+const string tableName = "Users";
+var newTableParameters = new CreateTableParameters(databaseId, tableName);
+var createTableResult = await nocoClient.CreateTable(newTableParameters);
+if (createResult.Success)
+    Console.WriteLine("Table created");
+else
+    Console.WriteLine(createResult.ErrorMessage);
+```
+    
+    
+
+This is an example of creating a table with 4 custom columns:
+```csharp
+const string databaseId = "some_Base_Id";
+const string tableName = "Users";
+    
+var newTableParameters = new CreateTableParameters(databaseId, tableName)
+{
+    TableTitle = tableName,
+    ColumnsData = new List<CreateColumnParameters>()
+    {
+        new CreateColumnParameters("UserName", ColumnDataType.SingleLineText)
+        {
+            Title = "UserName",
+            IsAutoIncremented = false,
+            ColumnDefaultValue = "Full Name",
+            IsRequired = true,
+            IsColumnUnique = false
+        },
+        new CreateColumnParameters("Email", ColumnDataType.Email)
+        {
+            Title = "Email",
+            ColumnDefaultValue = "user@email.com"
+        },
+        new CreateColumnParameters("IsActive", ColumnDataType.Checkbox)
+        {
+            Title = "IsActive",
+            ColumnDefaultValue = true
+        },
+        new CreateColumnParameters("Passport", ColumnDataType.Attachment)
+        {
+            Title = "Passport",
+            ColumnDefaultValue = null,
+        }
+    }
+};
+var createTableResult = await nocoClient.CreateTable(newTableParameters);
+if (!createTableResult.Success)
+    Console.WriteLine(createTableResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Table created:\n" +
+        $"BaseId: {createTableResult.Result.BaseId}\n" +
+        $"CreatedAt: {createTableResult.Result.CreatedAt}\n" +
+        $"Description: {createTableResult.Result.Description}\n" +
+        $"Enabled: {createTableResult.Result.Enabled}\n" +
+        $"Id: {createTableResult.Result.Id}\n" +
+        $"Mm: {createTableResult.Result.Mm}\n" +
+        $"Meta: {createTableResult.Result.Meta}\n" +
+        $"Order: {createTableResult.Result.Order}\n" +
+        $"Pinned: {createTableResult.Result.Pinned}\n" +
+        $"Schema: {createTableResult.Result.Schema}\n" +
+        $"SourceId: {createTableResult.Result.SourceId}\n" +
+        $"TableName: {createTableResult.Result.TableName}\n" +
+        $"Tags: {createTableResult.Result.Tags}\n" +            
+        $"Title: {createTableResult.Result.Title}\n" +
+        $"Type: {createTableResult.Result.Type}\n" +
+        $"UpdatedAt: {createTableResult.Result.UpdatedAt}\n");
+}
+```
+

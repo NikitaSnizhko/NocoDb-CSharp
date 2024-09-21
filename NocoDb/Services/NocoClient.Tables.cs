@@ -1,7 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using NocoDb.Utils;
 using Newtonsoft.Json;
+using NocoDb.Models.Tables;
+using NocoDb.Models.Tables.Request;
+using NocoDb.Models.Tables.RequestParameters;
 using NocoDb.Models.Tables.Response;
 
 namespace NocoDb.Services
@@ -27,7 +33,7 @@ namespace NocoDb.Services
                     return new OperationResult<GetAllTablesResponse>()
                     {
                         Success = false,
-                        ErrorMessage = responseContent
+                        ErrorMessage = $"Error getting tables. Status code: {response.StatusCode}"
                     };
                 }
 
@@ -42,6 +48,61 @@ namespace NocoDb.Services
             catch (Exception e)
             {
                 return new OperationResult<GetAllTablesResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = e.Message
+                };
+            }
+        }
+        
+        
+        /// <summary>
+        /// Create a new table in the database.
+        /// Official API reference: <a href="https://meta-apis-v2.nocodb.com/#tag/DB-Table/operation/db-table-create">Create Table</a>
+        /// </summary>
+        /// <param name="tableParameters">Parameters for table creation.</param>
+        /// <returns></returns>
+        public async Task<OperationResult<CreateTableResponse>> CreateTable(CreateTableParameters tableParameters)
+        {
+            try
+            {
+                var createTableRequest = new CreateTableRequest(tableParameters.CreateDefaultIdColumn)
+                {
+                    TableName = tableParameters.TableName,
+                    TableTitle = tableParameters.TableTitle
+                };
+                // Add columns to the request like this because, in the constructor of CreateTableRequest, the default ID column is already added.
+                if(tableParameters.ColumnsData != null && tableParameters.ColumnsData.Any())
+                    createTableRequest.Columns
+                        .AddRange(tableParameters.ColumnsData
+                            .Select(x => x.ToNormalColumnModel()));
+                
+                var createTableRequestJson = JsonConvert.SerializeObject(createTableRequest);
+                var httpContent = new StringContent(createTableRequestJson, System.Text.Encoding.UTF8, MediaTypes.ApplicationJson);
+                var url = TableUrlConstants.CreateTableUrl(tableParameters.DadaBaseId);
+                var createTableResponse = await httpClient.PostAsync(url, httpContent);
+                
+                if (!createTableResponse.IsSuccessStatusCode)
+                {
+                    return new OperationResult<CreateTableResponse>()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Error creating table. Status code: {createTableResponse.StatusCode}"
+                    };
+                }
+
+                var tableResponseString = await createTableResponse.Content.ReadAsStringAsync();
+                var tableObject = JsonConvert.DeserializeObject<CreateTableResponse>(tableResponseString);
+                return new OperationResult<CreateTableResponse>()
+                {
+                    Success = true,
+                    Result = tableObject
+                };
+
+            }
+            catch (Exception e)
+            {
+                return new OperationResult<CreateTableResponse>()
                 {
                     Success = false,
                     ErrorMessage = e.Message

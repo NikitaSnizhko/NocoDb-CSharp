@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils;
 using NocoDb.Models.GeneralNocoUtils.RequestParameters;
+using NocoDb.Models.Tables;
+using NocoDb.Models.Tables.RequestParameters;
 using NocoDb.Services;
 
 namespace ConsoleTest
@@ -197,6 +200,75 @@ namespace ConsoleTest
                 }
                 Console.WriteLine(tablesString);
             }*/
+
+            #region Create a new table
+            //1) Simple empty table:
+            /*const string databaseId = "some_Base_Id";
+            const string tableName = "Users";
+            var newTableParameters = new CreateTableParameters(databaseId, tableName);
+            var createTableResult = await nocoClient.CreateTable(newTableParameters);
+            Console.WriteLine(createTableResult.Success ? "Table created" : createTableResult.ErrorMessage);*/
+
+            //2) Table with columns:
+            /*const string databaseId = "some_Base_Id";
+            const string tableName = "Users";
+            var newTableParameters = new CreateTableParameters(databaseId, tableName)
+            {
+                TableTitle = tableName,
+                ColumnsData = new List<CreateColumnParameters>()
+                {
+                    new CreateColumnParameters("UserName", ColumnDataType.SingleLineText)
+                    {
+                        Title = "UserName",
+                        IsAutoIncremented = false,
+                        ColumnDefaultValue = "Full Name",
+                        IsRequired = true,
+                        IsColumnUnique = false
+                    },
+                    new CreateColumnParameters("Email", ColumnDataType.Email)
+                    {
+                        Title = "Email",
+                        ColumnDefaultValue = "user@mail.com"
+                    },
+                    new CreateColumnParameters("IsActive", ColumnDataType.Checkbox)
+                    {
+                        Title = "IsActive",
+                        ColumnDefaultValue = true
+                    },
+                    new CreateColumnParameters("Passport", ColumnDataType.Attachment)
+                    {
+                        Title = "Passport",
+                        ColumnDefaultValue = null,
+                    }
+                }
+            };
+            var createTableResult = await nocoClient.CreateTable(newTableParameters);
+            if (!createTableResult.Success)
+                Console.WriteLine(createTableResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Table created:\n" +
+                                  $"BaseId: {createTableResult.Result.BaseId}\n" +
+                                  $"CreatedAt: {createTableResult.Result.CreatedAt}\n" +
+                                  $"Description: {createTableResult.Result.Description}\n" +
+                                  $"Enabled: {createTableResult.Result.Enabled}\n" +
+                                  $"Id: {createTableResult.Result.Id}\n" +
+                                  $"Mm: {createTableResult.Result.Mm}\n" +
+                                  $"Meta: {createTableResult.Result.Meta}\n" +
+                                  $"Order: {createTableResult.Result.Order}\n" +
+                                  $"Pinned: {createTableResult.Result.Pinned}\n" +
+                                  $"Schema: {createTableResult.Result.Schema}\n" +
+                                  $"SourceId: {createTableResult.Result.SourceId}\n" +
+                                  $"TableName: {createTableResult.Result.TableName}\n" +
+                                  $"Tags: {createTableResult.Result.Tags}\n" +
+                                  $"Title: {createTableResult.Result.Title}\n" +
+                                  $"Type: {createTableResult.Result.Type}\n" +
+                                  $"UpdatedAt: {createTableResult.Result.UpdatedAt}\n");
+            }*/
+            #endregion
+            
+            
+            
         }
     }
 }

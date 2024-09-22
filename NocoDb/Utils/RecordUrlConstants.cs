@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using JetBrains.Annotations;
 
 namespace NocoDb.Utils
 {
@@ -15,10 +16,20 @@ namespace NocoDb.Utils
         /// </summary>
         /// <param name="tableId">Id of the table to interact.</param>
         /// <param name="recordId">Id of the certain record in the table.</param>
+        /// <param name="fields">Table fields that have to listed in the response.</param>
         /// <returns>Url like /api/v2/tables/{tableId}/records/{recordId}</returns>
-        public static string GetTemplateRecordUrl(string tableId, string recordId)
+        public static string GetRecordUrl(
+            [NotNull]string tableId, 
+            [NotNull]string recordId, 
+            List<string> fields = null)
         {
-            return $"/api/v2/tables/{tableId}/records/{recordId}";
+            if(string.IsNullOrEmpty(tableId)) throw new ArgumentNullException(nameof(tableId));
+            if(string.IsNullOrEmpty(recordId)) throw new ArgumentNullException(nameof(recordId));
+            var requestUrl = $"/api/v2/tables/{tableId}/records/{recordId}";
+            if (fields == null || !fields.Any()) return requestUrl;
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["fields"] = string.Join(",", fields);
+            return $"{requestUrl}?{query}";
         }
 
         /// <summary>

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace NocoDb.Models.Records.Dto
+namespace NocoDb.Models.Records.RequestParameters
 {
-    public class GetRecordsQueryParamsDto
+    public class GetRecordsQueryParams
     {
         /// <summary>
         /// Pass field names that you want to get from the table. Only this fields will be returned.

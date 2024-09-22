@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils;
 using NocoDb.Models.GeneralNocoUtils.RequestParameters;
+using NocoDb.Models.Records.RequestParameters;
 using NocoDb.Models.Tables;
 using NocoDb.Models.Tables.RequestParameters;
 using NocoDb.Services;
@@ -329,6 +330,30 @@ namespace ConsoleTest
                 Console.WriteLine($"Table duplicated:\n" +
                                   $"Id: {duplicateTableResult.Result.Id}");
             }*/
+            #endregion
+            
+            #region Get single record by id
+            //This is the first simple way to get a record and return it as a string (json).
+            //You can later deserialize it to a class.
+            const string tableId = "some_Table_Id";
+            const string recordId = "some_Record_Id";
+            var getRecordParameters = new GetRecordParameters(tableId, recordId)
+            {
+                //Skip this if you want to get all fields.
+                //These are optional. Use it if you want to get only specific fields.
+                Fields = new List<string>()
+                {
+                    "UserName",
+                    "Email"
+                }
+            };
+            var getRecordResult = await nocoClient.GetRecordAsString(getRecordParameters);
+            if (!getRecordResult.Success)
+                Console.WriteLine(getRecordResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Record:\n{getRecordResult.Result}");
+            }
             #endregion
         }
     }

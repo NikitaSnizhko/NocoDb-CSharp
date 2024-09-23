@@ -100,11 +100,12 @@
         <Compile Include="Models\GeneralNocoUtils\Response\GetAppInfoResponse.cs" />
         <Compile Include="Models\GeneralNocoUtils\Response\TestDbConnectionResponse.cs" />
         <Compile Include="Models\PageInfo.cs" />
+        <Compile Include="Models\Records\Attachment.cs" />
         <Compile Include="Models\Records\RequestParameters\CreateRecordParameters.cs" />
         <Compile Include="Models\Records\RequestParameters\GetRecordParameters.cs" />
         <Compile Include="Models\Records\RequestParameters\GetRecordsQueryParams.cs" />
         <Compile Include="Models\Records\RequestParameters\UpdateRecordParameters.cs" />
-        <Compile Include="Models\Records\Response\GetRecordResponse.cs" />
+        <Compile Include="Models\Records\Response\IRecordResponse.cs" />
         <Compile Include="Models\Tables\ColumnDataType.cs" />
         <Compile Include="Models\Tables\NormalColumnModel.cs" />
         <Compile Include="Models\Tables\RequestParameters\CreateColumnParameters.cs" />

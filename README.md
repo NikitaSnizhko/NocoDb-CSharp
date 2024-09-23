@@ -47,6 +47,8 @@ Console.WriteLine
 : $"App info:\n{getAppInfoResult.Result.Type}");
 ```
 
+---
+
 ### Databases methods:
 #### Get base info:
 ```csharp
@@ -175,6 +177,8 @@ else
         $"BaseId: {duplicateBaseResult.Result.BaseId}\n");
 }
 ```
+
+---
 
 ### Tables methods:
 #### Get all tables in base:
@@ -354,4 +358,91 @@ else
     Console.WriteLine($"Table duplicated:\n" +
         $"Id: {duplicateTableResult.Result.Id}");
 }
+```
+
+---
+
+### Records methods:
+
+#### Get record in table:
+There are two options to get a record in a table. Get it as a json string(as NocoDb server return)
+or map it to custom type(if all fields are known).
+
+In both options it is possible to get all fields or only specific fields
+by specifying them in the `Fields` property of the `GetRecordParameters` object.
+For all fields, leave the `Fields` property empty or skip it at all like this:
+`var getRecordParameters = new GetRecordParameters(tableId, recordId);`
+
+1. [x] First option: as string
+```csharp
+const string tableId = "some_Table_Id";
+const string recordId = "some_Record_Id";
+var getRecordParameters = new GetRecordParameters(tableId, recordId)
+{
+    //Skip this if you want to get all fields.
+    //These are optional. Use it if you want to get only specific fields.
+    Fields = new List<string>()
+    {
+        "UserName",
+        "Email"
+    }
+};
+var getRecordResult = await nocoClient.GetRecordAsString(getRecordParameters);
+if (!getRecordResult.Success)
+    Console.WriteLine(getRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Record:\n{getRecordResult.Result}");
+}
+```
+
+2. [x] Second option: as custom type
+
+Here it is necessary to create a class that will represent the record in the table.
+This is the basic example of the class that represents the record in the table 
+created above(see the example of creating a table with 4 custom columns):
+```csharp
+private class ExampleGetRecordResponseType : IRecordResponse
+{
+    //These fields custom for the record in the table.
+    public string UserName { get; set; }
+    public string Email { get; set; }
+    public bool IsActive { get; set; }
+    //For a files it is handy to use the Attachment type from NocoDb.Models.Records.Attachment.
+    //NOTE: Any attachments fields have to be a list of Attachment objects.
+    public List<NocoDb.Models.Records.Attachment> Passport { get; set; }
+    
+    //These fields come from the IRecordResponse interface.
+    public string Id { get; set; }
+    public string CreatedAt { get; set; }
+    public string UpdatedAt { get; set; }
+}
+```
+This class inherits from the `IRecordResponse` interface. It ensures that a few important fields,
+which are always present in the record response, are included.
+
+It is not mandatory to inherit from this interface (and it is recommended not to inherit if you use a custom "ID" field). 
+In such cases, you must manually add all necessary fields to the class.
+
+Then we can get the record as a custom type:
+```csharp
+const string tableId = "some_Table_Id";
+const string recordId = "some_Record_Id";
+var getRecordParameters = new GetRecordParameters(tableId, recordId);
+
+var getRecordAsTypeResult = await nocoClient.GetRecordAsType<ExampleGetRecordResponseType>(getRecordParameters);
+if(getRecordAsTypeResult.Success)
+{
+    var record = getRecordAsTypeResult.Result;
+    Console.WriteLine($"Record:\n" +
+                      $"UserName: {record.UserName}\n" +
+                      $"Email: {record.Email}\n" +
+                      $"IsActive: {record.IsActive}\n" +
+                      $"Passport: {record.Passport.FirstOrDefault()?.Title}\n" +
+                      $"CreatedAt: {record.CreatedAt}\n" +
+                      $"UpdatedAt: {record.UpdatedAt}\n" +
+                      $"Id: {record.Id}\n");
+}
+else
+    Console.WriteLine(getRecordAsTypeResult.ErrorMessage);
 ```

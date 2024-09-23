@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils;
 using NocoDb.Models.GeneralNocoUtils.RequestParameters;
+using NocoDb.Models.Records;
 using NocoDb.Models.Records.RequestParameters;
+using NocoDb.Models.Records.Response;
 using NocoDb.Models.Tables;
 using NocoDb.Models.Tables.RequestParameters;
 using NocoDb.Services;
@@ -354,7 +358,39 @@ namespace ConsoleTest
             {
                 Console.WriteLine($"Record:\n{getRecordResult.Result}");
             }
+            
+            //This is the second way to get a record and return it as a custom type.
+            //Init the class you want to deserialize the record to and use it as a type parameter.
+            
+            var getRecordAsTypeResult = await nocoClient.GetRecordAsType<ExampleGetRecordResponseType>(getRecordParameters);
+            if(getRecordAsTypeResult.Success)
+            {
+                var record = getRecordAsTypeResult.Result;
+                Console.WriteLine($"Record:\n" +
+                                  $"UserName: {record.UserName}\n" +
+                                  $"Email: {record.Email}\n" +
+                                  $"IsActive: {record.IsActive}\n" +
+                                  $"Passport: {record.Passport.FirstOrDefault()?.Title}\n" +
+                                  $"CreatedAt: {record.CreatedAt}\n" +
+                                  $"UpdatedAt: {record.UpdatedAt}\n" +
+                                  $"Id: {record.Id}\n");
+            }
+            else
+                Console.WriteLine(getRecordAsTypeResult.ErrorMessage);
             #endregion
+        }
+
+        private class ExampleGetRecordResponseType : IRecordResponse
+        {
+            public string UserName { get; set; }
+            public string Email { get; set; }
+            public bool IsActive { get; set; }
+            //For a files it is handy to use the Attachment type from NocoDb.Models.Records.Attachment.
+            //NOTE: Any attachments fields have to be a list of Attachment objects.
+            public List<NocoDb.Models.Records.Attachment> Passport { get; set; }
+            public string Id { get; set; }
+            public string CreatedAt { get; set; }
+            public string UpdatedAt { get; set; }
         }
     }
 }

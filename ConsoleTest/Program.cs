@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils;
 using NocoDb.Models.GeneralNocoUtils.RequestParameters;
@@ -337,7 +338,7 @@ namespace ConsoleTest
             #endregion
             
             #region Get single record by id
-            //This is the first simple way to get a record and return it as a string (json).
+            /*//This is the first simple way to get a record and return it as a string (json).
             //You can later deserialize it to a class.
             const string tableId = "some_Table_Id";
             const string recordId = "some_Record_Id";
@@ -357,9 +358,9 @@ namespace ConsoleTest
             else
             {
                 Console.WriteLine($"Record:\n{getRecordResult.Result}");
-            }
+            }*/
             
-            //This is the second way to get a record and return it as a custom type.
+            /*//This is the second way to get a record and return it as a custom type.
             //Init the class you want to deserialize the record to and use it as a type parameter.
             
             var getRecordAsTypeResult = await nocoClient.GetRecordAsType<ExampleGetRecordResponseType>(getRecordParameters);
@@ -376,7 +377,40 @@ namespace ConsoleTest
                                   $"Id: {record.Id}\n");
             }
             else
-                Console.WriteLine(getRecordAsTypeResult.ErrorMessage);
+                Console.WriteLine(getRecordAsTypeResult.ErrorMessage);*/
+            #endregion
+            
+            #region Create a new record
+            const string tableId = "some_Table_Id";
+            var createRecordParameters = new CreateRecordsParameters<ExampleCreateRecordType>(tableId)
+            {
+                //You have to provide at least one record. Max number of records are unknown.
+                Records = new List<ExampleCreateRecordType>
+                {
+                    new ExampleCreateRecordType()
+                    {
+                        UserName = "John Doe",
+                        Email = "some@email.com",
+                        IsActive = true
+                    },
+                    new ExampleCreateRecordType()
+                    {
+                        UserName = "Jane Doe",
+                        Email = "some2@email.com",
+                        IsActive = false
+                    }
+                }
+            };
+            var createRecordResult = await nocoClient.CreateRecords(createRecordParameters);
+            if(!createRecordResult.Success)
+                Console.WriteLine(createRecordResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Records created:\n" +
+                                  $"Number of records: {createRecordResult.Result.Records.Count}\n" +
+                                  $"First record: {createRecordResult.Result.Records.FirstOrDefault()}");
+            }//It will return the string object which contains the created records Ids(or other primary key field). 
+
             #endregion
         }
 
@@ -391,6 +425,22 @@ namespace ConsoleTest
             public string Id { get; set; }
             public string CreatedAt { get; set; }
             public string UpdatedAt { get; set; }
+        }
+        
+        private class ExampleCreateRecordType
+        {
+            //NOTE-1: DO NOT include server generated fields like Id, CreatedAt, UpdatedAt, etc.
+            //NOTE-2: DO NOT include auto incremented fields.
+            //NOTE-3: Use json property attribute to map the class properties to the table columns.
+            
+            [JsonProperty("UserName")]
+            public string UserName { get; set; }
+            
+            [JsonProperty("Email")]
+            public string Email { get; set; }
+            
+            [JsonProperty("IsActive")]
+            public bool IsActive { get; set; }
         }
     }
 }

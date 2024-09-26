@@ -101,10 +101,12 @@
         <Compile Include="Models\GeneralNocoUtils\Response\TestDbConnectionResponse.cs" />
         <Compile Include="Models\PageInfo.cs" />
         <Compile Include="Models\Records\Attachment.cs" />
-        <Compile Include="Models\Records\RequestParameters\CreateRecordParameters.cs" />
+        <Compile Include="Models\Records\RequestParameters\CreateRecordsParameters.cs" />
         <Compile Include="Models\Records\RequestParameters\GetRecordParameters.cs" />
         <Compile Include="Models\Records\RequestParameters\GetRecordsQueryParams.cs" />
         <Compile Include="Models\Records\RequestParameters\UpdateRecordParameters.cs" />
+        <Compile Include="Models\Records\Request\CreateRecordsRequest.cs" />
+        <Compile Include="Models\Records\Response\CreateRecordsResponse.cs" />
         <Compile Include="Models\Records\Response\IRecordResponse.cs" />
         <Compile Include="Models\Tables\ColumnDataType.cs" />
         <Compile Include="Models\Tables\NormalColumnModel.cs" />
@@ -140,9 +142,6 @@
     <ItemGroup>
       <None Include="App.config" />
       <None Include="packages.config" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Models\Records\Request\" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

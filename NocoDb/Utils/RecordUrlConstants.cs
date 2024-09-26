@@ -31,6 +31,18 @@ namespace NocoDb.Utils
             query["fields"] = string.Join(",", fields);
             return $"{requestUrl}?{query}";
         }
+        
+        /// <summary>
+        /// Create URL for creating a record in the table.
+        /// </summary>
+        /// <param name="tableId">Id of the table to interact.</param>
+        /// <returns>Url like /api/v2/tables/{tableId}/records</returns>
+        /// <exception cref="ArgumentNullException">Raised if tableId was null or empty.</exception>
+        public static string CreateRecordUrl([NotNull]string tableId)
+        {
+            if(string.IsNullOrEmpty(tableId)) throw new ArgumentNullException(nameof(tableId));
+            return $"/api/v2/tables/{tableId}/records";
+        }
 
         /// <summary>
         /// Used to get the URL template without base URL.

@@ -82,7 +82,12 @@ public partial class NocoClient
                 };
             }
             var recordResponseString = await recordResponse.Content.ReadAsStringAsync();
-            var recordResponseObject = JsonConvert.DeserializeObject<T>(recordResponseString);
+            
+            //This converter allows to download file attachments if any in the response.
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new FileAttachmentResponseConverter(httpClient));
+            
+            var recordResponseObject = JsonConvert.DeserializeObject<T>(recordResponseString, settings);
             return new OperationResult<T>()
             {
                 Success = true,
@@ -101,6 +106,7 @@ public partial class NocoClient
     
     /// <summary>
     /// Create records in a table.
+    /// Official API reference: <a href="https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-create">Create records.</a>
     /// </summary>
     /// <param name="createRecordsParameters">Parameters to create a records.</param>
     /// <typeparam name="T">Type to automatically map the request.</typeparam>

@@ -30,6 +30,33 @@ public static class FileOperations
             }
         }
     }
+    
+    /// <summary>
+    /// Downloads files from a list of serverFilesLinks.
+    /// </summary>
+    /// <param name="serverFilesLinks">List of tuples with title and downloadPath.</param>
+    /// <param name="client">HTTP client to interact with calls.</param>
+    /// <returns>List of tuples with fileName and fileContent as byte array.</returns>
+    /// <exception cref="Exception">Through if client could not download file from certain downloadPath.</exception>
+    public static async Task<List<(string fileName, byte[] fileContent)>> DownloadFiles(
+        List<(string title, string downloadPath)> serverFilesLinks, 
+        HttpClient client)
+    {
+        var files = new List<(string fileName, byte[] fileContent)>();
+
+        foreach (var fileLink in serverFilesLinks)
+        {
+            var response = await client.GetAsync(fileLink.downloadPath);
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Failed to download {fileLink.title}. Status code: {response.StatusCode}");
+
+            var fileContent = await response.Content.ReadAsByteArrayAsync();
+            files.Add((fileLink.title, fileContent));
+        }
+
+        return files;
+    }
+    
 
     /// <summary>
     /// Uploads a file from a local path to NocoDb storage.

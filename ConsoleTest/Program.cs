@@ -340,18 +340,18 @@ namespace ConsoleTest
             #endregion
             
             #region Get single record by id
-            /*//This is the first simple way to get a record and return it as a string (json).
+            /*// 1)
+            //This is the first simple way to get a record and return it as a string (json).
             //You can later deserialize it to a class.
             const string tableId = "some_Table_Id";
             const string recordId = "some_Record_Id";
             var getRecordParameters = new GetRecordParameters(tableId, recordId)
             {
-                //Skip this if you want to get all fields.
-                //These are optional. Use it if you want to get only specific fields.
+                //These are optional. Use it if you want to get only specific fields. Skip this if you want to get all fields.
                 Fields = new List<string>()
                 {
                     "UserName",
-                    "Email"
+                    "Passport",
                 }
             };
             var getRecordResult = await nocoClient.GetRecordAsString(getRecordParameters);
@@ -360,9 +360,10 @@ namespace ConsoleTest
             else
             {
                 Console.WriteLine($"Record:\n{getRecordResult.Result}");
-            }*/
+            }
             
-            /*//This is the second way to get a record and return it as a custom type.
+            // 2)
+            //This is the second way to get a record and return it as a custom type.
             //Init the class you want to deserialize the record to and use it as a type parameter.
             
             var getRecordAsTypeResult = await nocoClient.GetRecordAsType<ExampleGetRecordResponseType>(getRecordParameters);
@@ -370,13 +371,24 @@ namespace ConsoleTest
             {
                 var record = getRecordAsTypeResult.Result;
                 Console.WriteLine($"Record:\n" +
-                                  $"UserName: {record.UserName}\n" +
-                                  $"Email: {record.Email}\n" +
+                                  $"UserName: {record.UserName ?? "Not provided"}\n" +
+                                  $"Email: {record.Email ?? "Not provided"}\n" +
                                   $"IsActive: {record.IsActive}\n" +
-                                  $"Passport: {record.Passport.FirstOrDefault()?.Title}\n" +
-                                  $"CreatedAt: {record.CreatedAt}\n" +
-                                  $"UpdatedAt: {record.UpdatedAt}\n" +
-                                  $"Id: {record.Id}\n");
+                                  $"Passport: {(record.Passport == null ? "Not provided" : record.Passport.FirstOrDefault()?.File.fileName)}\n" +
+                                  $"CreatedAt: {record.CreatedAt  ?? "Not provided"}\n" +
+                                  $"UpdatedAt: {record.UpdatedAt  ?? "Not provided"}\n" +
+                                  $"Id: {record.Id ?? "Not provided"}\n");
+
+                
+                //Example how to download the attachment file locally:
+                var attachment = record.Passport?.FirstOrDefault()?.File;
+                if (attachment != null)
+                {
+                    const string localFilePath = @"some\path\to\save\folder";
+                    var attachmentFilePath = Path.Combine(localFilePath, attachment.Value.fileName);
+                    File.WriteAllBytes(attachmentFilePath, attachment.Value.fileContent);
+                    Console.WriteLine($"Attachment file saved to: {attachmentFilePath}");
+                }
             }
             else
                 Console.WriteLine(getRecordAsTypeResult.ErrorMessage);*/
@@ -440,9 +452,9 @@ namespace ConsoleTest
             public string UserName { get; set; }
             public string Email { get; set; }
             public bool IsActive { get; set; }
-            //For a files it is handy to use the Attachment type from NocoDb.Models.Records.Attachment.
-            //NOTE: Any attachments fields have to be a list of Attachment objects.
-            public List<NocoDb.Models.Records.Attachment> Passport { get; set; }
+            
+            //NOTE: Any attachments fields have to be a list of FileAttachmentResponse objects.
+            public List<FileAttachmentResponse> Passport { get; set; }
             public string Id { get; set; }
             public string CreatedAt { get; set; }
             public string UpdatedAt { get; set; }

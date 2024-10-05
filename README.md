@@ -373,7 +373,7 @@ by specifying them in the `Fields` property of the `GetRecordParameters` object.
 For all fields, leave the `Fields` property empty or skip it at all like this:
 `var getRecordParameters = new GetRecordParameters(tableId, recordId);`
 
-1. [x] First option: as string
+Initialize the `GetRecordParameters` object:
 ```csharp
 const string tableId = "some_Table_Id";
 const string recordId = "some_Record_Id";
@@ -387,6 +387,10 @@ var getRecordParameters = new GetRecordParameters(tableId, recordId)
         "Email"
     }
 };
+```
+
+1. [x] First option: as string
+```csharp
 var getRecordResult = await nocoClient.GetRecordAsString(getRecordParameters);
 if (!getRecordResult.Success)
     Console.WriteLine(getRecordResult.ErrorMessage);
@@ -408,9 +412,9 @@ private class ExampleGetRecordResponseType : IRecordResponse
     public string UserName { get; set; }
     public string Email { get; set; }
     public bool IsActive { get; set; }
-    //For a files it is handy to use the Attachment type from NocoDb.Models.Records.Attachment.
-    //NOTE: Any attachments fields have to be a list of Attachment objects.
-    public List<NocoDb.Models.Records.Attachment> Passport { get; set; }
+    
+    //NOTE: Any attachments fields have to be a list of FileAttachmentResponse objects.
+    public List<FileAttachmentResponse> Passport { get; set; }
     
     //These fields come from the IRecordResponse interface.
     public string Id { get; set; }
@@ -435,17 +439,32 @@ if(getRecordAsTypeResult.Success)
 {
     var record = getRecordAsTypeResult.Result;
     Console.WriteLine($"Record:\n" +
-                      $"UserName: {record.UserName}\n" +
-                      $"Email: {record.Email}\n" +
+                      $"UserName: {record.UserName ?? "Not provided"}\n" +
+                      $"Email: {record.Email ?? "Not provided"}\n" +
                       $"IsActive: {record.IsActive}\n" +
-                      $"Passport: {record.Passport.FirstOrDefault()?.Title}\n" +
-                      $"CreatedAt: {record.CreatedAt}\n" +
-                      $"UpdatedAt: {record.UpdatedAt}\n" +
-                      $"Id: {record.Id}\n");
+                      $"Passport: {(record.Passport == null ? "Not provided" : record.Passport.FirstOrDefault()?.File.fileName)}\n" +
+                      $"CreatedAt: {record.CreatedAt  ?? "Not provided"}\n" +
+                      $"UpdatedAt: {record.UpdatedAt  ?? "Not provided"}\n" +
+                      $"Id: {record.Id ?? "Not provided"}\n");
 }
 else
     Console.WriteLine(getRecordAsTypeResult.ErrorMessage);
 ```
+
+And the last thing you can do after got a response is to convert attachment somewhere
+because the response contains only the file name and byte array.
+Here is simple example how to achieve this:
+```csharp
+var attachment = record.Passport?.FirstOrDefault()?.File;
+if (attachment != null)
+{
+    const string localFilePath = @"some\path\to\save\folder";
+    var attachmentFilePath = Path.Combine(localFilePath, attachment.Value.fileName);
+    File.WriteAllBytes(attachmentFilePath, attachment.Value.fileContent);
+    Console.WriteLine($"Attachment file saved to: {attachmentFilePath}");
+}
+```
+
 
 #### Create records in table:
 

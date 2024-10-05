@@ -16,9 +16,6 @@ public class Attachment
     [JsonProperty("size")]
     public int Size { get; set; }
     
-    /*[JsonProperty("icon")]
-    public string Icon { get; set; }*/
-    
     [JsonProperty("signedPath")]
     public string SignedPath { get; set; }
 }

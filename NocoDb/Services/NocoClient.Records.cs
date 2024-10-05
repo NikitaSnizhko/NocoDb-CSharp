@@ -59,7 +59,7 @@ public partial class NocoClient
     /// Get a record as a custom type.
     /// Official API reference: <a href="https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-read">Read record.</a>
     /// </summary>
-    /// <param name="getRecordParams">Parameters to get the record.</param>
+    /// <param name="getRecordParams">Parameters to get a record.</param>
     /// <typeparam name="T">Type to automatically map the response.</typeparam>
     /// <returns>Strongly typed response instance.</returns>
     public async Task<OperationResult<T>> GetRecordAsType<T>([NotNull]GetRecordParameters getRecordParams)
@@ -99,6 +99,12 @@ public partial class NocoClient
         }
     }
     
+    /// <summary>
+    /// Create records in a table.
+    /// </summary>
+    /// <param name="createRecordsParameters">Parameters to create a records.</param>
+    /// <typeparam name="T">Type to automatically map the request.</typeparam>
+    /// <returns>Return the string object which contains the created records Ids(or other primary key field).</returns>
     public async Task<OperationResult<CreateRecordsResponse>> CreateRecords<T>(
         [NotNull]CreateRecordsParameters<T> createRecordsParameters)
     {
@@ -112,11 +118,11 @@ public partial class NocoClient
                     ErrorMessage = "No records to create."
                 };
             }
-            /*var createRecordRequest = new CreateRecordsRequest<T>()
-            {
-                Records = createRecordsParameters.Records 
-            };*/
-            var createRecordRequestJson = JsonConvert.SerializeObject(createRecordsParameters.Records);
+            // Add custom converters to flexibly parse FileAttachments if any in the request were passed.
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new FileAttachmentConverter(httpClient));
+            
+            var createRecordRequestJson = JsonConvert.SerializeObject(createRecordsParameters.Records, settings);
             var createRecordContent = new StringContent(createRecordRequestJson, System.Text.Encoding.UTF8, MediaTypes.ApplicationJson);
             var createRecordUrl = RecordUrlConstants.CreateRecordUrl(createRecordsParameters.TableId);
             

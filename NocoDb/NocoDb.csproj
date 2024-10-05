@@ -106,6 +106,8 @@
         <Compile Include="Models\Records\RequestParameters\GetRecordsQueryParams.cs" />
         <Compile Include="Models\Records\RequestParameters\UpdateRecordParameters.cs" />
         <Compile Include="Models\Records\Request\CreateRecordsRequest.cs" />
+        <Compile Include="Models\Records\Request\FileAttachementConverter.cs" />
+        <Compile Include="Models\Records\Request\FileAttachmentRequest.cs" />
         <Compile Include="Models\Records\Response\CreateRecordsResponse.cs" />
         <Compile Include="Models\Records\Response\IRecordResponse.cs" />
         <Compile Include="Models\Tables\ColumnDataType.cs" />

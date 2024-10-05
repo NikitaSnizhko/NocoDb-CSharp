@@ -446,3 +446,96 @@ if(getRecordAsTypeResult.Success)
 else
     Console.WriteLine(getRecordAsTypeResult.ErrorMessage);
 ```
+
+#### Create records in table:
+
+First of all, it is necessary to create a class that will represent the record in the table.
+Its fields must match the fields of the table. And db-related or autoincremented fields must be ignored.
+
+There are some important notes about creating a class that represents the record in the table:
+1. [x] DO NOT include server generated fields like Id, CreatedAt, UpdatedAt, etc.  
+2. [x] DO NOT include auto incremented fields.
+3. [x] Use json property attribute to map the class properties to the table columns.
+4. [x] Use the `List<FileAttachmentRequest>` type from `NocoDb.Models.Records.Request` for attachments fields.
+5. [x] Be very careful with the "**_required_**" fields. In the current case, the UserName is required so
+if it is not initialized in the future it will throw an exception. 
+So it is mandatory to initialize it by default here or later in class instances.
+```csharp
+private class ExampleCreateRecordType
+{
+    [JsonProperty("UserName")]
+    public string UserName { get; set; } = string.Empty;
+
+    [JsonProperty("Email",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string Email { get; set; }
+
+    [JsonProperty("IsActive")]
+    public bool IsActive { get; set; }
+
+    [JsonProperty("Passport",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public List<FileAttachmentRequest> Passport { get; set; }
+}
+```
+
+If the field contains attachment so we can prepare data for attachment fields:
+```csharp
+const string tableId = "some_Table_Id";
+const string attachmentFilePath = @"some\path\to\file.jpg";
+
+var fileName = Path.GetFileName(attachmentFilePath);
+var fileContent = File.ReadAllBytes(attachmentFilePath);
+
+var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+```
+
+Then we can create a record in the table:
+```csharp
+var createRecordParameters = new CreateRecordsParameters<ExampleCreateRecordType>(tableId)
+{
+    //You have to provide at least one record. Max number of records are unknown.
+    Records = new List<ExampleCreateRecordType>
+    {
+        //Example of a record with few attachments.
+        new ExampleCreateRecordType()
+        {
+            UserName = "John Doe",
+            Email = "example@email.com",
+            IsActive = true,
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment,
+                passportAttachment,
+                passportAttachment
+            }
+        },
+        //Example of a record with one attachment.
+        new ExampleCreateRecordType()
+        {
+            UserName = "Jane Doe",
+            Email = "example-2@email.com",
+            IsActive = false,
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment
+            }   
+        },
+        //Example of an empty record.
+        new ExampleCreateRecordType()
+    }
+};
+
+var createRecordResult = await nocoClient.CreateRecords(createRecordParameters);
+if(!createRecordResult.Success)
+    Console.WriteLine(createRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Records created:\n" +
+                      $"Number of records: {createRecordResult.Result.Records.Count}\n" +
+                      $"First record: {createRecordResult.Result.Records.FirstOrDefault()}");
+}
+```
+

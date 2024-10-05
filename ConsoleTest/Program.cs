@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -9,6 +10,7 @@ using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils;
 using NocoDb.Models.GeneralNocoUtils.RequestParameters;
 using NocoDb.Models.Records;
+using NocoDb.Models.Records.Request;
 using NocoDb.Models.Records.RequestParameters;
 using NocoDb.Models.Records.Response;
 using NocoDb.Models.Tables;
@@ -381,24 +383,44 @@ namespace ConsoleTest
             #endregion
             
             #region Create a new record
-            const string tableId = "some_Table_Id";
+            /*const string tableId = "some_Table_Id";
+            const string attachmentFilePath = @"some\path\to\file.extension";
+            
+            var fileName = Path.GetFileName(attachmentFilePath);
+            var fileContent = File.ReadAllBytes(attachmentFilePath);
+            var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+            
             var createRecordParameters = new CreateRecordsParameters<ExampleCreateRecordType>(tableId)
             {
                 //You have to provide at least one record. Max number of records are unknown.
                 Records = new List<ExampleCreateRecordType>
                 {
+                    //Example of a record with few attachments.
                     new ExampleCreateRecordType()
                     {
                         UserName = "John Doe",
                         Email = "some@email.com",
-                        IsActive = true
+                        IsActive = true,
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment,
+                            passportAttachment,
+                            passportAttachment
+                        }
                     },
+                    //Example of a record with one attachment.
                     new ExampleCreateRecordType()
                     {
                         UserName = "Jane Doe",
                         Email = "some2@email.com",
-                        IsActive = false
-                    }
+                        IsActive = false,
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment
+                        }
+                    },
+                    //Example of an empty record.
+                    new ExampleCreateRecordType()
                 }
             };
             var createRecordResult = await nocoClient.CreateRecords(createRecordParameters);
@@ -409,8 +431,7 @@ namespace ConsoleTest
                 Console.WriteLine($"Records created:\n" +
                                   $"Number of records: {createRecordResult.Result.Records.Count}\n" +
                                   $"First record: {createRecordResult.Result.Records.FirstOrDefault()}");
-            }//It will return the string object which contains the created records Ids(or other primary key field). 
-
+            }//It will return the string object which contains the created records Ids(or other primary key field). */
             #endregion
         }
 
@@ -432,15 +453,26 @@ namespace ConsoleTest
             //NOTE-1: DO NOT include server generated fields like Id, CreatedAt, UpdatedAt, etc.
             //NOTE-2: DO NOT include auto incremented fields.
             //NOTE-3: Use json property attribute to map the class properties to the table columns.
+            //NOTE-4: Use the List<FileAttachmentRequest> type from NocoDb.Models.Records.Request for attachments fields.
             
+            //NOTE-5: Be very careful with the "*required" fields. In current case the UserName is required so
+            //if it is not initialized in the future it will throw an exception.
+            //So it is mandatory to initialize it by default here or later in class instances.
             [JsonProperty("UserName")]
-            public string UserName { get; set; }
+            public string UserName { get; set; } = string.Empty;
             
-            [JsonProperty("Email")]
+            [JsonProperty("Email", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
             public string Email { get; set; }
             
             [JsonProperty("IsActive")]
             public bool IsActive { get; set; }
+            
+            [JsonProperty("Passport", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public List<FileAttachmentRequest> Passport { get; set; }
         }
     }
 }

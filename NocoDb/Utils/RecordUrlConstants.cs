@@ -12,7 +12,7 @@ namespace NocoDb.Utils
     public static class RecordUrlConstants
     {
         /// <summary>
-        /// Used to get the URL template without base URL.
+        /// Configure URL for getting a record from the table.
         /// </summary>
         /// <param name="tableId">Id of the table to interact.</param>
         /// <param name="recordId">Id of the certain record in the table.</param>
@@ -33,7 +33,7 @@ namespace NocoDb.Utils
         }
         
         /// <summary>
-        /// Create URL for creating a record in the table.
+        /// Configure URL for creating a record in the table.
         /// </summary>
         /// <param name="tableId">Id of the table to interact.</param>
         /// <returns>Url like /api/v2/tables/{tableId}/records</returns>
@@ -44,6 +44,18 @@ namespace NocoDb.Utils
             return $"/api/v2/tables/{tableId}/records";
         }
 
+        /// <summary>
+        /// Configure URL for updating records in the table.
+        /// </summary>
+        /// <param name="tableId">Id of the table to interact.</param>
+        /// <returns>Url like /api/v2/tables/{tableId}/records</returns>
+        /// <exception cref="ArgumentNullException">Raised if tableId was null or empty.</exception>
+        public static string UpdateRecordsUrl([NotNull]string tableId)
+        {
+            if(string.IsNullOrEmpty(tableId)) throw new ArgumentNullException(nameof(tableId));
+            return $"/api/v2/tables/{tableId}/records";
+        }
+        
         /// <summary>
         /// Used to get the URL template without base URL.
         /// </summary>

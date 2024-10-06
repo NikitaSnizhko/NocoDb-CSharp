@@ -500,7 +500,7 @@ private class ExampleCreateRecordType
 }
 ```
 
-If the field contains attachment so we can prepare data for attachment fields:
+If the class contains attachment so we can prepare data for attachment fields:
 ```csharp
 const string tableId = "some_Table_Id";
 const string attachmentFilePath = @"some\path\to\file.jpg";
@@ -558,3 +558,94 @@ else
 }
 ```
 
+#### Update record in table:
+Process of updating a records is similar to creating a record.
+So we have to create a class that represents the updated records in the table.
+
+There are some important notes about creating a class that represents the record in the table:
+1. [x] Very important to include the Id field (or other key-identifier) in the class.
+2. [x] DO NOT include server generated fields like CreatedAt, UpdatedAt, etc.
+3. [x] DO NOT include auto incremented fields.
+4. [x] Use json property attribute to map the class properties to the table columns.
+5. [x] Use the `List<FileAttachmentRequest>` type from `NocoDb.Models.Records.Request` for attachments fields.
+
+```csharp
+private class ExampleUpdateRecordsType
+{        
+    [JsonProperty("Id", Required = Required.Always)]
+    public string Id { get; set; }
+    
+    [JsonProperty("UserName",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string UserName { get; set; }
+    
+    [JsonProperty("Email",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string Email { get; set; }
+    
+    [JsonProperty("IsActive")]
+    public bool IsActive { get; set; }
+    
+    [JsonProperty("Passport",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public List<FileAttachmentRequest> Passport { get; set; }
+}
+```
+
+If the class contains attachment so we can prepare data for attachment fields:
+```csharp
+const string tableId = "some_Table_Id";
+const string attachmentFilePath = @"some\path\to\file.jpg";
+
+var fileName = Path.GetFileName(attachmentFilePath);
+var fileContent = File.ReadAllBytes(attachmentFilePath);
+
+var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+```
+Next step is to build the update parameters and execute UpdateRecords method:
+```csharp
+var updateRecordParameters = new UpdateRecordsParameters<ExampleUpdateRecordsType>(tableId)
+{
+    //You have to provide at least one record. Max number of records are unknown.
+    //You need to include only the fields you want to update.
+    Records = new List<ExampleUpdateRecordsType>
+    {
+        //Example of a record with few attachments.
+        new ExampleUpdateRecordsType()
+        {
+            Id = "114",
+            UserName = "John Doe",
+            Email = "some@email.com",
+            IsActive = true,
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment,
+                passportAttachment,
+                passportAttachment
+            }
+        },
+        //Example of a record with one attachment. 
+        new ExampleUpdateRecordsType()
+        {
+            Id = "115",
+            UserName = "Jane Doe",
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment
+            }
+        }
+    }
+};
+var updateRecordResult = await nocoClient.UpdateRecords(updateRecordParameters);
+if(!updateRecordResult.Success)
+    Console.WriteLine(updateRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Records updated:\n" +
+                      $"Number of records: {updateRecordResult.Result.Records.Count}\n" +
+                      $"First record: {updateRecordResult.Result.Records.FirstOrDefault()}");
+}//It will return the string object which contains the created records Ids(or other primary key field).
+```

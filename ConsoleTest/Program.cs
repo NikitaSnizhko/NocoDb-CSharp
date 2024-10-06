@@ -445,6 +445,56 @@ namespace ConsoleTest
                                   $"First record: {createRecordResult.Result.Records.FirstOrDefault()}");
             }//It will return the string object which contains the created records Ids(or other primary key field). */
             #endregion
+            
+            #region Update records
+            const string tableId = "some_Table_Id";
+            const string attachmentFilePath = @"some\path\to\file.extension";
+            
+            var fileName = Path.GetFileName(attachmentFilePath);
+            var fileContent = File.ReadAllBytes(attachmentFilePath);
+            var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+            
+            var updateRecordParameters = new UpdateRecordsParameters<ExampleUpdateRecordsType>(tableId)
+            {
+                //You have to provide at least one record. Max number of records are unknown.
+                Records = new List<ExampleUpdateRecordsType>
+                {
+                    //Example of a record with few attachments.
+                    new ExampleUpdateRecordsType()
+                    {
+                        Id = "114",
+                        UserName = "John Doe",
+                        Email = "some@email.com",
+                        IsActive = true,
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment,
+                            passportAttachment,
+                            passportAttachment
+                        }
+                    },
+                    //Example of a record with one attachment.
+                    new ExampleUpdateRecordsType()
+                    {
+                        Id = "115",
+                        UserName = "Jane Doe",
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment
+                        }
+                    }
+                }
+            };
+            var updateRecordResult = await nocoClient.UpdateRecords(updateRecordParameters);
+            if(!updateRecordResult.Success)
+                Console.WriteLine(updateRecordResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Records updated:\n" +
+                                  $"Number of records: {updateRecordResult.Result.Records.Count}\n" +
+                                  $"First record: {updateRecordResult.Result.Records.FirstOrDefault()}");
+            }//It will return the string object which contains the created records Ids(or other primary key field).
+            #endregion
         }
 
         private class ExampleGetRecordResponseType : IRecordResponse
@@ -472,6 +522,41 @@ namespace ConsoleTest
             //So it is mandatory to initialize it by default here or later in class instances.
             [JsonProperty("UserName")]
             public string UserName { get; set; } = string.Empty;
+            
+            [JsonProperty("Email", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public string Email { get; set; }
+            
+            [JsonProperty("IsActive")]
+            public bool IsActive { get; set; }
+            
+            [JsonProperty("Passport", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public List<FileAttachmentRequest> Passport { get; set; }
+        }
+        
+        
+        private class ExampleUpdateRecordsType
+        {
+            //NOTE-1: DO NOT include server generated fields like CreatedAt, UpdatedAt, etc.
+            //NOTE-2: DO NOT include auto incremented fields.
+            //NOTE-3: Use json property attribute to map the class properties to the table columns.
+            //NOTE-4: Use the List<FileAttachmentRequest> type from NocoDb.Models.Records.Request for attachments fields.
+            
+            //NOTE-5: Be very careful with the "*required" fields. In current case the UserName is required so
+            //if it is not initialized in the future it will throw an exception.
+            //So it is mandatory to initialize it by default here or later in class instances.
+            
+            //Very important to include the Id field (or other key-identifier) in the class.
+            [JsonProperty("Id", Required = Required.Always)]
+            public string Id { get; set; }
+            
+            [JsonProperty("UserName", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public string UserName { get; set; }
             
             [JsonProperty("Email", 
                 NullValueHandling = NullValueHandling.Ignore, 

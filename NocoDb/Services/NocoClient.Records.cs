@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using NocoDb.Extensions;
 using NocoDb.Models.Records.Request;
 using NocoDb.Models.Records.RequestParameters;
 using NocoDb.Models.Records.Response;
@@ -157,6 +158,66 @@ public partial class NocoClient
         catch (Exception ex)
         {
             return new OperationResult<CreateRecordsResponse>()
+            {
+                Success = false,
+                ErrorMessage = ex.Message
+            };
+        }
+    }
+
+    
+    /// <summary>
+    /// Update records in a table.
+    /// </summary>
+    /// <param name="updateRecordsParameters">Parameters to update a records.</param>
+    /// <typeparam name="T">Type to automatically map the request.</typeparam>
+    /// <returns>Return the string object which contains the updated records Ids(or other primary key field).</returns>
+    public async Task<OperationResult<UpdateRecordsResponse>> UpdateRecords<T>(
+        [NotNull] UpdateRecordsParameters<T> updateRecordsParameters)
+    {
+        try
+        {
+            if(updateRecordsParameters.Records == null || updateRecordsParameters.Records.Count == 0)
+            {
+                return new OperationResult<UpdateRecordsResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = "No records to update."
+                };
+            }
+            // Add custom converters to flexibly parse FileAttachments if any in the request were passed.
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new FileAttachmentConverter(httpClient));
+            
+            var updateRecordRequestJson = JsonConvert.SerializeObject(updateRecordsParameters.Records, settings);
+            var updateRecordContent = new StringContent(updateRecordRequestJson, System.Text.Encoding.UTF8, MediaTypes.ApplicationJson);
+            var updateRecordUrl = RecordUrlConstants.UpdateRecordsUrl(updateRecordsParameters.TableId);
+            
+            var updateRecordResponse = await httpClient.PatchAsync(updateRecordUrl, updateRecordContent);
+            
+            if (!updateRecordResponse.IsSuccessStatusCode)
+            {
+                return new OperationResult<UpdateRecordsResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = $"Error creating records. Error StatusCode: {updateRecordResponse.StatusCode}"
+                };
+            }
+            var updateRecordResponseString = await updateRecordResponse.Content.ReadAsStringAsync();
+            var updateRecordResponseObject = JsonConvert.DeserializeObject<List<object>>(updateRecordResponseString);
+            var updateRecordResponseInstance = new UpdateRecordsResponse()
+            {
+                Records = updateRecordResponseObject
+            };
+            return new OperationResult<UpdateRecordsResponse>()
+            {
+                Success = true,
+                Result = updateRecordResponseInstance
+            };
+        }
+        catch (Exception ex)
+        {
+            return new OperationResult<UpdateRecordsResponse>()
             {
                 Success = false,
                 ErrorMessage = ex.Message

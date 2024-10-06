@@ -1,10 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using NocoDb.Models.Bases.RequestParameters;
 using NocoDb.Models.GeneralNocoUtils;
 using NocoDb.Models.GeneralNocoUtils.RequestParameters;
+using NocoDb.Models.Records;
+using NocoDb.Models.Records.Request;
+using NocoDb.Models.Records.RequestParameters;
+using NocoDb.Models.Records.Response;
 using NocoDb.Models.Tables;
 using NocoDb.Models.Tables.RequestParameters;
 using NocoDb.Services;
@@ -330,6 +338,268 @@ namespace ConsoleTest
                                   $"Id: {duplicateTableResult.Result.Id}");
             }*/
             #endregion
+            
+            #region Get single record by id
+            /*// 1)
+            //This is the first simple way to get a record and return it as a string (json).
+            //You can later deserialize it to a class.
+            const string tableId = "some_Table_Id";
+            const string recordId = "some_Record_Id";
+            var getRecordParameters = new GetRecordParameters(tableId, recordId)
+            {
+                //These are optional. Use it if you want to get only specific fields. Skip this if you want to get all fields.
+                Fields = new List<string>()
+                {
+                    "UserName",
+                    "Passport",
+                }
+            };
+            var getRecordResult = await nocoClient.GetRecordAsString(getRecordParameters);
+            if (!getRecordResult.Success)
+                Console.WriteLine(getRecordResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Record:\n{getRecordResult.Result}");
+            }
+            
+            // 2)
+            //This is the second way to get a record and return it as a custom type.
+            //Init the class you want to deserialize the record to and use it as a type parameter.
+            
+            var getRecordAsTypeResult = await nocoClient.GetRecordAsType<ExampleGetRecordResponseType>(getRecordParameters);
+            if(getRecordAsTypeResult.Success)
+            {
+                var record = getRecordAsTypeResult.Result;
+                Console.WriteLine($"Record:\n" +
+                                  $"UserName: {record.UserName ?? "Not provided"}\n" +
+                                  $"Email: {record.Email ?? "Not provided"}\n" +
+                                  $"IsActive: {record.IsActive}\n" +
+                                  $"Passport: {(record.Passport == null ? "Not provided" : record.Passport.FirstOrDefault()?.File.fileName)}\n" +
+                                  $"CreatedAt: {record.CreatedAt  ?? "Not provided"}\n" +
+                                  $"UpdatedAt: {record.UpdatedAt  ?? "Not provided"}\n" +
+                                  $"Id: {record.Id ?? "Not provided"}\n");
+
+                
+                //Example how to download the attachment file locally:
+                var attachment = record.Passport?.FirstOrDefault()?.File;
+                if (attachment != null)
+                {
+                    const string localFilePath = @"some\path\to\save\folder";
+                    var attachmentFilePath = Path.Combine(localFilePath, attachment.Value.fileName);
+                    File.WriteAllBytes(attachmentFilePath, attachment.Value.fileContent);
+                    Console.WriteLine($"Attachment file saved to: {attachmentFilePath}");
+                }
+            }
+            else
+                Console.WriteLine(getRecordAsTypeResult.ErrorMessage);*/
+            #endregion
+            
+            #region Create a new record
+            /*const string tableId = "some_Table_Id";
+            const string attachmentFilePath = @"some\path\to\file.extension";
+            
+            var fileName = Path.GetFileName(attachmentFilePath);
+            var fileContent = File.ReadAllBytes(attachmentFilePath);
+            var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+            
+            var createRecordParameters = new CreateRecordsParameters<ExampleCreateRecordType>(tableId)
+            {
+                //You have to provide at least one record. Max number of records are unknown.
+                Records = new List<ExampleCreateRecordType>
+                {
+                    //Example of a record with few attachments.
+                    new ExampleCreateRecordType()
+                    {
+                        UserName = "John Doe",
+                        Email = "some@email.com",
+                        IsActive = true,
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment,
+                            passportAttachment,
+                            passportAttachment
+                        }
+                    },
+                    //Example of a record with one attachment.
+                    new ExampleCreateRecordType()
+                    {
+                        UserName = "Jane Doe",
+                        Email = "some2@email.com",
+                        IsActive = false,
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment
+                        }
+                    },
+                    //Example of an empty record.
+                    new ExampleCreateRecordType()
+                }
+            };
+            var createRecordResult = await nocoClient.CreateRecords(createRecordParameters);
+            if(!createRecordResult.Success)
+                Console.WriteLine(createRecordResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Records created:\n" +
+                                  $"Number of records: {createRecordResult.Result.Records.Count}\n" +
+                                  $"First record: {createRecordResult.Result.Records.FirstOrDefault()}");
+            }//It will return the string object which contains the created records Ids(or other primary key field). */
+            #endregion
+            
+            #region Update records
+            /*const string tableId = "some_Table_Id";
+            const string attachmentFilePath = @"some\path\to\file.extension";
+            
+            var fileName = Path.GetFileName(attachmentFilePath);
+            var fileContent = File.ReadAllBytes(attachmentFilePath);
+            var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+            
+            var updateRecordParameters = new UpdateRecordsParameters<ExampleUpdateRecordsType>(tableId)
+            {
+                //You have to provide at least one record. Max number of records are unknown.
+                Records = new List<ExampleUpdateRecordsType>
+                {
+                    //Example of a record with few attachments.
+                    new ExampleUpdateRecordsType()
+                    {
+                        Id = "114",
+                        UserName = "John Doe",
+                        Email = "some@email.com",
+                        IsActive = true,
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment,
+                            passportAttachment,
+                            passportAttachment
+                        }
+                    },
+                    //Example of a record with one attachment.
+                    new ExampleUpdateRecordsType()
+                    {
+                        Id = "115",
+                        UserName = "Jane Doe",
+                        Passport = new List<FileAttachmentRequest>()
+                        {
+                            passportAttachment
+                        }
+                    }
+                }
+            };
+            var updateRecordResult = await nocoClient.UpdateRecords(updateRecordParameters);
+            if(!updateRecordResult.Success)
+                Console.WriteLine(updateRecordResult.ErrorMessage);
+            else
+            {
+                Console.WriteLine($"Records updated:\n" +
+                                  $"Number of records: {updateRecordResult.Result.Records.Count}\n" +
+                                  $"First record: {updateRecordResult.Result.Records.FirstOrDefault()}");
+            }//It will return the string object which contains the created records Ids(or other primary key field).*/
+            #endregion
+            
+            #region Delete records
+            /*const string tableId = "some_Table_Id";
+            var deleteRecordParameters = new DeleteRecordsParameters<ExampleDeleteRecordType>(tableId)
+            {
+                //You have to provide at least one record. Max number of records are unknown.
+                Records = new List<ExampleDeleteRecordType>
+                {
+                    new ExampleDeleteRecordType()
+                    {
+                        Id = "120"
+                    },
+                    new ExampleDeleteRecordType()
+                    {
+                        Id = "121"
+                    }
+                }
+            };
+            var deleteRecordResult = await nocoClient.DeleteRecords(deleteRecordParameters);
+            if(!deleteRecordResult.Success)
+                Console.WriteLine(deleteRecordResult.ErrorMessage);
+            else
+                Console.WriteLine($"Number of deleted Records : {deleteRecordResult.Result.Records.Count}\n" +
+                                  $"First deleted record: {deleteRecordResult.Result.Records.FirstOrDefault()}");*/
+            #endregion
+        }
+
+        private class ExampleGetRecordResponseType : IRecordResponse
+        {
+            public string UserName { get; set; }
+            public string Email { get; set; }
+            public bool IsActive { get; set; }
+            
+            //NOTE: Any attachments fields have to be a list of FileAttachmentResponse objects.
+            public List<FileAttachmentResponse> Passport { get; set; }
+            public string Id { get; set; }
+            public string CreatedAt { get; set; }
+            public string UpdatedAt { get; set; }
+        }
+        
+        private class ExampleCreateRecordType
+        {
+            //NOTE-1: DO NOT include server generated fields like Id, CreatedAt, UpdatedAt, etc.
+            //NOTE-2: DO NOT include auto incremented fields.
+            //NOTE-3: Use json property attribute to map the class properties to the table columns.
+            //NOTE-4: Use the List<FileAttachmentRequest> type from NocoDb.Models.Records.Request for attachments fields.
+            
+            //NOTE-5: Be very careful with the "*required" fields. In current case the UserName is required so
+            //if it is not initialized in the future it will throw an exception.
+            //So it is mandatory to initialize it by default here or later in class instances.
+            [JsonProperty("UserName")]
+            public string UserName { get; set; } = string.Empty;
+            
+            [JsonProperty("Email", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public string Email { get; set; }
+            
+            [JsonProperty("IsActive")]
+            public bool IsActive { get; set; }
+            
+            [JsonProperty("Passport", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public List<FileAttachmentRequest> Passport { get; set; }
+        }
+        
+        private class ExampleUpdateRecordsType
+        {
+            //NOTE-1: DO NOT include server generated fields like CreatedAt, UpdatedAt, etc.
+            //NOTE-2: DO NOT include auto incremented fields.
+            //NOTE-3: Use json property attribute to map the class properties to the table columns.
+            //NOTE-4: Use the List<FileAttachmentRequest> type from NocoDb.Models.Records.Request for attachments fields.
+            
+            //NOTE-5: Be very careful with the "*required" fields. In current case the UserName is required so
+            //if it is not initialized in the future it will throw an exception.
+            //So it is mandatory to initialize it by default here or later in class instances.
+            
+            //Very important to include the Id field (or other key-identifier) in the class.
+            [JsonProperty("Id", Required = Required.Always)]
+            public string Id { get; set; }
+            
+            [JsonProperty("UserName", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public string UserName { get; set; }
+            
+            [JsonProperty("Email", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public string Email { get; set; }
+            
+            [JsonProperty("IsActive")]
+            public bool IsActive { get; set; }
+            
+            [JsonProperty("Passport", 
+                NullValueHandling = NullValueHandling.Ignore, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public List<FileAttachmentRequest> Passport { get; set; }
+        }
+        
+        private class ExampleDeleteRecordType
+        {
+            [JsonProperty("Id", Required = Required.Always)]
+            public string Id { get; set; }
         }
     }
 }

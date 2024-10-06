@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using JetBrains.Annotations;
 
 namespace NocoDb.Utils
 {
@@ -11,16 +12,63 @@ namespace NocoDb.Utils
     public static class RecordUrlConstants
     {
         /// <summary>
-        /// Used to get the URL template without base URL.
+        /// Configure URL for getting a record from the table.
         /// </summary>
         /// <param name="tableId">Id of the table to interact.</param>
         /// <param name="recordId">Id of the certain record in the table.</param>
+        /// <param name="fields">Table fields that have to listed in the response.</param>
         /// <returns>Url like /api/v2/tables/{tableId}/records/{recordId}</returns>
-        public static string GetTemplateRecordUrl(string tableId, string recordId)
+        public static string GetRecordUrl(
+            [NotNull]string tableId, 
+            [NotNull]string recordId, 
+            List<string> fields = null)
         {
-            return $"/api/v2/tables/{tableId}/records/{recordId}";
+            if(string.IsNullOrEmpty(tableId)) throw new ArgumentNullException(nameof(tableId));
+            if(string.IsNullOrEmpty(recordId)) throw new ArgumentNullException(nameof(recordId));
+            var requestUrl = $"/api/v2/tables/{tableId}/records/{recordId}";
+            if (fields == null || !fields.Any()) return requestUrl;
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["fields"] = string.Join(",", fields);
+            return $"{requestUrl}?{query}";
+        }
+        
+        /// <summary>
+        /// Configure URL for creating a record in the table.
+        /// </summary>
+        /// <param name="tableId">Id of the table to interact.</param>
+        /// <returns>Url like /api/v2/tables/{tableId}/records</returns>
+        /// <exception cref="ArgumentNullException">Raised if tableId was null or empty.</exception>
+        public static string CreateRecordUrl([NotNull]string tableId)
+        {
+            if(string.IsNullOrEmpty(tableId)) throw new ArgumentNullException(nameof(tableId));
+            return $"/api/v2/tables/{tableId}/records";
         }
 
+        /// <summary>
+        /// Configure URL for updating records in the table.
+        /// </summary>
+        /// <param name="tableId">Id of the table to interact.</param>
+        /// <returns>Url like /api/v2/tables/{tableId}/records</returns>
+        /// <exception cref="ArgumentNullException">Raised if tableId was null or empty.</exception>
+        public static string UpdateRecordsUrl([NotNull]string tableId)
+        {
+            if(string.IsNullOrEmpty(tableId)) throw new ArgumentNullException(nameof(tableId));
+            return $"/api/v2/tables/{tableId}/records";
+        }
+        
+        
+        /// <summary>
+        /// Configure URL for deleting records in the table.
+        /// </summary>
+        /// <param name="tableId">Id of the table to interact.</param>
+        /// <returns>Url like /api/v2/tables/{tableId}/records</returns>
+        /// <exception cref="ArgumentNullException">Raised if tableId was null or empty.</exception>
+        public static string DeleteRecordsUrl([NotNull]string tableId)
+        {
+            if(string.IsNullOrEmpty(tableId)) throw new ArgumentNullException(nameof(tableId));
+            return $"/api/v2/tables/{tableId}/records";
+        }
+        
         /// <summary>
         /// Used to get the URL template without base URL.
         /// </summary>

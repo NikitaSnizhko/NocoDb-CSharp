@@ -47,6 +47,8 @@ Console.WriteLine
 : $"App info:\n{getAppInfoResult.Result.Type}");
 ```
 
+---
+
 ### Databases methods:
 #### Get base info:
 ```csharp
@@ -175,6 +177,8 @@ else
         $"BaseId: {duplicateBaseResult.Result.BaseId}\n");
 }
 ```
+
+---
 
 ### Tables methods:
 #### Get all tables in base:
@@ -353,5 +357,337 @@ else
 {
     Console.WriteLine($"Table duplicated:\n" +
         $"Id: {duplicateTableResult.Result.Id}");
+}
+```
+
+---
+
+### Records methods:
+
+#### Get record in table:
+There are two options to get a record in a table. Get it as a json string(as NocoDb server return)
+or map it to custom type(if all fields are known).
+
+In both options it is possible to get all fields or only specific fields
+by specifying them in the `Fields` property of the `GetRecordParameters` object.
+For all fields, leave the `Fields` property empty or skip it at all like this:
+`var getRecordParameters = new GetRecordParameters(tableId, recordId);`
+
+Initialize the `GetRecordParameters` object:
+```csharp
+const string tableId = "some_Table_Id";
+const string recordId = "some_Record_Id";
+var getRecordParameters = new GetRecordParameters(tableId, recordId)
+{
+    //Skip this if you want to get all fields.
+    //These are optional. Use it if you want to get only specific fields.
+    Fields = new List<string>()
+    {
+        "UserName",
+        "Email"
+    }
+};
+```
+
+1. [x] First option: as string
+```csharp
+var getRecordResult = await nocoClient.GetRecordAsString(getRecordParameters);
+if (!getRecordResult.Success)
+    Console.WriteLine(getRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Record:\n{getRecordResult.Result}");
+}
+```
+
+2. [x] Second option: as custom type
+
+Here it is necessary to create a class that will represent the record in the table.
+This is the basic example of the class that represents the record in the table 
+created above(see the example of creating a table with 4 custom columns):
+```csharp
+private class ExampleGetRecordResponseType : IRecordResponse
+{
+    //These fields custom for the record in the table.
+    public string UserName { get; set; }
+    public string Email { get; set; }
+    public bool IsActive { get; set; }
+    
+    //NOTE: Any attachments fields have to be a list of FileAttachmentResponse objects.
+    public List<FileAttachmentResponse> Passport { get; set; }
+    
+    //These fields come from the IRecordResponse interface.
+    public string Id { get; set; }
+    public string CreatedAt { get; set; }
+    public string UpdatedAt { get; set; }
+}
+```
+This class inherits from the `IRecordResponse` interface. It ensures that a few important fields,
+which are always present in the record response, are included.
+
+It is not mandatory to inherit from this interface (and it is recommended not to inherit if you use a custom "ID" field). 
+In such cases, you must manually add all necessary fields to the class.
+
+Then we can get the record as a custom type:
+```csharp
+const string tableId = "some_Table_Id";
+const string recordId = "some_Record_Id";
+var getRecordParameters = new GetRecordParameters(tableId, recordId);
+
+var getRecordAsTypeResult = await nocoClient.GetRecordAsType<ExampleGetRecordResponseType>(getRecordParameters);
+if(getRecordAsTypeResult.Success)
+{
+    var record = getRecordAsTypeResult.Result;
+    Console.WriteLine($"Record:\n" +
+                      $"UserName: {record.UserName ?? "Not provided"}\n" +
+                      $"Email: {record.Email ?? "Not provided"}\n" +
+                      $"IsActive: {record.IsActive}\n" +
+                      $"Passport: {(record.Passport == null ? "Not provided" : record.Passport.FirstOrDefault()?.File.fileName)}\n" +
+                      $"CreatedAt: {record.CreatedAt  ?? "Not provided"}\n" +
+                      $"UpdatedAt: {record.UpdatedAt  ?? "Not provided"}\n" +
+                      $"Id: {record.Id ?? "Not provided"}\n");
+}
+else
+    Console.WriteLine(getRecordAsTypeResult.ErrorMessage);
+```
+
+And the last thing you can do after got a response is to convert attachment somewhere
+because the response contains only the file name and byte array.
+Here is simple example how to achieve this:
+```csharp
+var attachment = record.Passport?.FirstOrDefault()?.File;
+if (attachment != null)
+{
+    const string localFilePath = @"some\path\to\save\folder";
+    var attachmentFilePath = Path.Combine(localFilePath, attachment.Value.fileName);
+    File.WriteAllBytes(attachmentFilePath, attachment.Value.fileContent);
+    Console.WriteLine($"Attachment file saved to: {attachmentFilePath}");
+}
+```
+
+
+#### Create records in table:
+
+First of all, it is necessary to create a class that will represent the record in the table.
+Its fields must match the fields of the table. And db-related or autoincremented fields must be ignored.
+
+There are some important notes about creating a class that represents the record in the table:
+1. [x] DO NOT include server generated fields like Id, CreatedAt, UpdatedAt, etc.  
+2. [x] DO NOT include auto incremented fields.
+3. [x] Use json property attribute to map the class properties to the table columns.
+4. [x] Use the `List<FileAttachmentRequest>` type from `NocoDb.Models.Records.Request` for attachments fields.
+5. [x] Be very careful with the "**_required_**" fields. In the current case, the UserName is required so
+if it is not initialized in the future it will throw an exception. 
+So it is mandatory to initialize it by default here or later in class instances.
+```csharp
+private class ExampleCreateRecordType
+{
+    [JsonProperty("UserName")]
+    public string UserName { get; set; } = string.Empty;
+
+    [JsonProperty("Email",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string Email { get; set; }
+
+    [JsonProperty("IsActive")]
+    public bool IsActive { get; set; }
+
+    [JsonProperty("Passport",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public List<FileAttachmentRequest> Passport { get; set; }
+}
+```
+
+If the class contains attachment so we can prepare data for attachment fields:
+```csharp
+const string tableId = "some_Table_Id";
+const string attachmentFilePath = @"some\path\to\file.jpg";
+
+var fileName = Path.GetFileName(attachmentFilePath);
+var fileContent = File.ReadAllBytes(attachmentFilePath);
+
+var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+```
+
+Then we can create a record in the table:
+```csharp
+var createRecordParameters = new CreateRecordsParameters<ExampleCreateRecordType>(tableId)
+{
+    //You have to provide at least one record. Max number of records are unknown.
+    Records = new List<ExampleCreateRecordType>
+    {
+        //Example of a record with few attachments.
+        new ExampleCreateRecordType()
+        {
+            UserName = "John Doe",
+            Email = "example@email.com",
+            IsActive = true,
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment,
+                passportAttachment,
+                passportAttachment
+            }
+        },
+        //Example of a record with one attachment.
+        new ExampleCreateRecordType()
+        {
+            UserName = "Jane Doe",
+            Email = "example-2@email.com",
+            IsActive = false,
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment
+            }   
+        },
+        //Example of an empty record.
+        new ExampleCreateRecordType()
+    }
+};
+
+var createRecordResult = await nocoClient.CreateRecords(createRecordParameters);
+if(!createRecordResult.Success)
+    Console.WriteLine(createRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Records created:\n" +
+                      $"Number of records: {createRecordResult.Result.Records.Count}\n" +
+                      $"First record: {createRecordResult.Result.Records.FirstOrDefault()}");
+}
+```
+
+#### Update record in table:
+Process of updating a records is similar to creating a record.
+So we have to create a class that represents the updated records in the table.
+
+There are some important notes about creating a class that represents the record in the table:
+1. [x] Very important to include the Id field (or other key-identifier) in the class.
+2. [x] DO NOT include server generated fields like CreatedAt, UpdatedAt, etc.
+3. [x] DO NOT include auto incremented fields.
+4. [x] Use json property attribute to map the class properties to the table columns.
+5. [x] Use the `List<FileAttachmentRequest>` type from `NocoDb.Models.Records.Request` for attachments fields.
+
+```csharp
+private class ExampleUpdateRecordsType
+{        
+    [JsonProperty("Id", Required = Required.Always)]
+    public string Id { get; set; }
+    
+    [JsonProperty("UserName",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string UserName { get; set; }
+    
+    [JsonProperty("Email",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string Email { get; set; }
+    
+    [JsonProperty("IsActive")]
+    public bool IsActive { get; set; }
+    
+    [JsonProperty("Passport",
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public List<FileAttachmentRequest> Passport { get; set; }
+}
+```
+
+If the class contains attachment so we can prepare data for attachment fields:
+```csharp
+const string tableId = "some_Table_Id";
+const string attachmentFilePath = @"some\path\to\file.jpg";
+
+var fileName = Path.GetFileName(attachmentFilePath);
+var fileContent = File.ReadAllBytes(attachmentFilePath);
+
+var passportAttachment = new FileAttachmentRequest(fileName, fileContent);
+```
+Next step is to build the update parameters and execute UpdateRecords method:
+```csharp
+var updateRecordParameters = new UpdateRecordsParameters<ExampleUpdateRecordsType>(tableId)
+{
+    //You have to provide at least one record. Max number of records are unknown.
+    //You need to include only the fields you want to update.
+    Records = new List<ExampleUpdateRecordsType>
+    {
+        //Example of a record with few attachments.
+        new ExampleUpdateRecordsType()
+        {
+            Id = "114",
+            UserName = "John Doe",
+            Email = "some@email.com",
+            IsActive = true,
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment,
+                passportAttachment,
+                passportAttachment
+            }
+        },
+        //Example of a record with one attachment. 
+        new ExampleUpdateRecordsType()
+        {
+            Id = "115",
+            UserName = "Jane Doe",
+            Passport = new List<FileAttachmentRequest>()
+            {
+                passportAttachment
+            }
+        }
+    }
+};
+var updateRecordResult = await nocoClient.UpdateRecords(updateRecordParameters);
+if(!updateRecordResult.Success)
+    Console.WriteLine(updateRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Records updated:\n" +
+                      $"Number of records: {updateRecordResult.Result.Records.Count}\n" +
+                      $"First record: {updateRecordResult.Result.Records.FirstOrDefault()}");
+}//It will return the string object which contains the created records Ids(or other primary key field).
+```
+
+#### Delete records in table:
+
+First of all, it is necessary to create a class that will represent the record in the table for deletion.
+It singles field must match the key field of the table. By default, it is "Id" and in my case it is the "Id" field.
+
+```csharp
+private class ExampleDeleteRecordType
+{
+    [JsonProperty("Id", Required = Required.Always)]
+    public string Id { get; set; }
+}
+```
+
+Then we can build the delete parameters and execute DeleteRecords method:
+```csharp
+const string tableId = "some_Table_Id";
+var deleteRecordParameters = new DeleteRecordsParameters<ExampleDeleteRecordType>(tableId)
+{
+    //You have to provide at least one record. Max number of records are unknown.
+    Records = new List<ExampleDeleteRecordType>
+    {
+        new ExampleDeleteRecordType()
+        {
+            Id = "114"
+        },
+        new ExampleDeleteRecordType()
+        {
+            Id = "115"
+        }
+    }
+};
+var deleteRecordResult = await nocoClient.DeleteRecords(deleteRecordParameters);
+
+if(!deleteRecordResult.Success)
+    Console.WriteLine(deleteRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Number of deleted Records : {deleteRecordResult.Result.Records.Count}\n" +
+                      $"First deleted record: {deleteRecordResult.Result.Records.FirstOrDefault()}");
 }
 ```

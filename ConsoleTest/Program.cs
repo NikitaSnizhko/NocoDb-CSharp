@@ -447,7 +447,7 @@ namespace ConsoleTest
             #endregion
             
             #region Update records
-            const string tableId = "some_Table_Id";
+            /*const string tableId = "some_Table_Id";
             const string attachmentFilePath = @"some\path\to\file.extension";
             
             var fileName = Path.GetFileName(attachmentFilePath);
@@ -493,7 +493,32 @@ namespace ConsoleTest
                 Console.WriteLine($"Records updated:\n" +
                                   $"Number of records: {updateRecordResult.Result.Records.Count}\n" +
                                   $"First record: {updateRecordResult.Result.Records.FirstOrDefault()}");
-            }//It will return the string object which contains the created records Ids(or other primary key field).
+            }//It will return the string object which contains the created records Ids(or other primary key field).*/
+            #endregion
+            
+            #region Delete records
+            /*const string tableId = "some_Table_Id";
+            var deleteRecordParameters = new DeleteRecordsParameters<ExampleDeleteRecordType>(tableId)
+            {
+                //You have to provide at least one record. Max number of records are unknown.
+                Records = new List<ExampleDeleteRecordType>
+                {
+                    new ExampleDeleteRecordType()
+                    {
+                        Id = "120"
+                    },
+                    new ExampleDeleteRecordType()
+                    {
+                        Id = "121"
+                    }
+                }
+            };
+            var deleteRecordResult = await nocoClient.DeleteRecords(deleteRecordParameters);
+            if(!deleteRecordResult.Success)
+                Console.WriteLine(deleteRecordResult.ErrorMessage);
+            else
+                Console.WriteLine($"Number of deleted Records : {deleteRecordResult.Result.Records.Count}\n" +
+                                  $"First deleted record: {deleteRecordResult.Result.Records.FirstOrDefault()}");*/
             #endregion
         }
 
@@ -537,7 +562,6 @@ namespace ConsoleTest
             public List<FileAttachmentRequest> Passport { get; set; }
         }
         
-        
         private class ExampleUpdateRecordsType
         {
             //NOTE-1: DO NOT include server generated fields like CreatedAt, UpdatedAt, etc.
@@ -570,6 +594,12 @@ namespace ConsoleTest
                 NullValueHandling = NullValueHandling.Ignore, 
                 DefaultValueHandling = DefaultValueHandling.Ignore)]
             public List<FileAttachmentRequest> Passport { get; set; }
+        }
+        
+        private class ExampleDeleteRecordType
+        {
+            [JsonProperty("Id", Required = Required.Always)]
+            public string Id { get; set; }
         }
     }
 }

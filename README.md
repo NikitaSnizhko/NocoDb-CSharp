@@ -649,3 +649,45 @@ else
                       $"First record: {updateRecordResult.Result.Records.FirstOrDefault()}");
 }//It will return the string object which contains the created records Ids(or other primary key field).
 ```
+
+#### Delete records in table:
+
+First of all, it is necessary to create a class that will represent the record in the table for deletion.
+It singles field must match the key field of the table. By default, it is "Id" and in my case it is the "Id" field.
+
+```csharp
+private class ExampleDeleteRecordType
+{
+    [JsonProperty("Id", Required = Required.Always)]
+    public string Id { get; set; }
+}
+```
+
+Then we can build the delete parameters and execute DeleteRecords method:
+```csharp
+const string tableId = "some_Table_Id";
+var deleteRecordParameters = new DeleteRecordsParameters<ExampleDeleteRecordType>(tableId)
+{
+    //You have to provide at least one record. Max number of records are unknown.
+    Records = new List<ExampleDeleteRecordType>
+    {
+        new ExampleDeleteRecordType()
+        {
+            Id = "114"
+        },
+        new ExampleDeleteRecordType()
+        {
+            Id = "115"
+        }
+    }
+};
+var deleteRecordResult = await nocoClient.DeleteRecords(deleteRecordParameters);
+
+if(!deleteRecordResult.Success)
+    Console.WriteLine(deleteRecordResult.ErrorMessage);
+else
+{
+    Console.WriteLine($"Number of deleted Records : {deleteRecordResult.Result.Records.Count}\n" +
+                      $"First deleted record: {deleteRecordResult.Result.Records.FirstOrDefault()}");
+}
+```

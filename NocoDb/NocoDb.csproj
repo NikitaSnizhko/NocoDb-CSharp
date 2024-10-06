@@ -101,6 +101,7 @@
         <Compile Include="Models\GeneralNocoUtils\Response\TestDbConnectionResponse.cs" />
         <Compile Include="Models\PageInfo.cs" />
         <Compile Include="Models\Records\RequestParameters\CreateRecordsParameters.cs" />
+        <Compile Include="Models\Records\RequestParameters\DeleteRecordsParameters.cs" />
         <Compile Include="Models\Records\RequestParameters\UpdateRecordsParameters.cs" />
         <Compile Include="Models\Records\RequestParameters\GetRecordParameters.cs" />
         <Compile Include="Models\Records\RequestParameters\GetRecordsQueryParams.cs" />
@@ -108,6 +109,7 @@
         <Compile Include="Models\Records\Request\FileAttachementConverter.cs" />
         <Compile Include="Models\Records\Request\FileAttachmentRequest.cs" />
         <Compile Include="Models\Records\Response\CreateRecordsResponse.cs" />
+        <Compile Include="Models\Records\Response\DeleteRecordsResponse.cs" />
         <Compile Include="Models\Records\Response\UpdateRecordsResponse.cs" />
         <Compile Include="Models\Records\Response\FileAttachmentResponse.cs" />
         <Compile Include="Models\Records\Response\FileAttachmentResponseConverter.cs" />

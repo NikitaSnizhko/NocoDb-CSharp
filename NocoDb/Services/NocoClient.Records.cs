@@ -200,7 +200,7 @@ public partial class NocoClient
                 return new OperationResult<UpdateRecordsResponse>()
                 {
                     Success = false,
-                    ErrorMessage = $"Error creating records. Error StatusCode: {updateRecordResponse.StatusCode}"
+                    ErrorMessage = $"Error updating records. Error StatusCode: {updateRecordResponse.StatusCode}"
                 };
             }
             var updateRecordResponseString = await updateRecordResponse.Content.ReadAsStringAsync();
@@ -218,6 +218,63 @@ public partial class NocoClient
         catch (Exception ex)
         {
             return new OperationResult<UpdateRecordsResponse>()
+            {
+                Success = false,
+                ErrorMessage = ex.Message
+            };
+        }
+    }
+    
+    
+    /// <summary>
+    /// Delete records in a table.
+    /// </summary>
+    /// <param name="deleteRecordsParameters">Parameters to delete a records.</param>
+    /// <typeparam name="T">Type to automatically map the request.</typeparam>
+    /// <returns>Return the string object which contains the deleted records Ids(or other primary key field).</returns>
+    public async Task<OperationResult<DeleteRecordsResponse>> DeleteRecords<T>(
+        [NotNull] DeleteRecordsParameters<T> deleteRecordsParameters)
+    {
+        try
+        {
+            if(deleteRecordsParameters.Records == null || deleteRecordsParameters.Records.Count == 0)
+            {
+                return new OperationResult<DeleteRecordsResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = "No records to delete."
+                };
+            }
+            
+            var deleteRecordRequestJson = JsonConvert.SerializeObject(deleteRecordsParameters.Records);
+            var deleteRecordContent = new StringContent(deleteRecordRequestJson, System.Text.Encoding.UTF8, MediaTypes.ApplicationJson);
+            var deleteRecordUrl = RecordUrlConstants.DeleteRecordsUrl(deleteRecordsParameters.TableId);
+            
+            var deleteRecordResponse = await httpClient.DeleteAsync(deleteRecordUrl, deleteRecordContent);
+            
+            if (!deleteRecordResponse.IsSuccessStatusCode)
+            {
+                return new OperationResult<DeleteRecordsResponse>()
+                {
+                    Success = false,
+                    ErrorMessage = $"Error deleting records. Error StatusCode: {deleteRecordResponse.StatusCode}"
+                };
+            }
+            var deleteRecordResponseString = await deleteRecordResponse.Content.ReadAsStringAsync();
+            var deleteRecordResponseObject = JsonConvert.DeserializeObject<List<object>>(deleteRecordResponseString);
+            var deleteRecordResponseInstance = new DeleteRecordsResponse()
+            {
+                Records = deleteRecordResponseObject
+            };
+            return new OperationResult<DeleteRecordsResponse>()
+            {
+                Success = true,
+                Result = deleteRecordResponseInstance
+            };
+        }
+        catch (Exception ex)
+        {
+            return new OperationResult<DeleteRecordsResponse>()
             {
                 Success = false,
                 ErrorMessage = ex.Message
